@@ -1,0 +1,233 @@
+"""M3 — NGƯỠNG SỐ MẢNH: DTLS có bắt tay nổi ở cỡ hậu lượng tử trên MTU ràng buộc không?
+
+⭐ ĐÂY LÀ PHÉP ĐO QUYẾT ĐỊNH CỦA CẢ HƯỚNG. Kết quả của nó đổi hẳn luận điểm bài báo.
+
+BỐI CẢNH. M2 (trên macOS, GnuTLS 3.8.13) tìm ra một ranh giới sắc: bắt tay DTLS **xong ở 22
+mảnh** và **hỏng ở 24 mảnh**. Ranh giới bám theo SỐ MẢNH chứ không theo tổng byte: giữ nguyên
+chứng thư, chỉ đổi MTU, thì kết quả đổi. Ở cỡ hậu lượng tử trên MTU 802.15.4 (102 B), chứng
+thư cần khoảng 52 đến 81 mảnh, tức vượt xa ngưỡng đó.
+
+NẾU ĐÚNG thì bài không còn là "EDHOC thua DTLS" mà là "CẢ HAI giao thức đều hỏng, theo hai
+kiểu khác nhau": EDHOC suy giảm êm nhưng thảm hại về số vòng, DTLS giữ số vòng nhưng cài đặt
+GÃY HẲN.
+
+⛔ NHƯNG MỘT CÀI ĐẶT KHÔNG CHỨNG MINH ĐƯỢC GÌ. Kiểm nội bộ chỉ chứng minh nhất quán. Tệp này
+chạy CÙNG phép dò trên MỌI cài đặt tìm thấy được, để phân biệt:
+
+    - Nhiều cài đặt cùng gãy ở CÙNG ngưỡng   -> vấn đề của GIAO THỨC hoặc của mô hình chung
+    - Chỉ một cài đặt gãy                     -> lỗi riêng của cài đặt đó, KHÔNG viết thành
+                                                 tuyên bố về giao thức
+    - Ngưỡng khác nhau rõ rệt                 -> vấn đề THAM SỐ (bộ đệm, bộ đếm giờ), phải
+                                                 nói đúng như vậy
+
+BA GIẢ THUYẾT CẦN TÁCH, vì chúng cho BA KẾT LUẬN KHÁC NHAU:
+    (a) giới hạn BỘ ĐỆM ráp mảnh      -> ngưỡng theo TỔNG BYTE, không theo số mảnh
+    (b) HẾT GIỜ truyền lại            -> nới thời gian chờ thì ngưỡng dịch; và ca hỏng tốn
+                                          THỜI GIAN LÂU hơn hẳn ca chạy
+    (c) giới hạn SỐ MẢNH mỗi bản tin  -> ngưỡng theo SỐ MẢNH, không đổi khi nới giờ
+
+M2 đã loại (a): cùng tổng byte, đổi MTU thì đổi kết quả. Tệp này đo THỜI GIAN tới lúc hỏng để
+tách (b) khỏi (c).
+
+CHẠY: python3 m3_fragment_threshold.py
+Không cần GPU. Không cần cài PQC: chỉ cần chứng thư to dần, vì lập luận nằm ở KÍCH THƯỚC.
+"""
+
+import json
+import os
+import shutil
+import subprocess
+import sys
+import time
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+WORK = os.path.join(HERE, ".certs")
+OUT = os.path.join(os.path.dirname(HERE), "results", "m3_fragment_threshold.json")
+
+# Chứng thư RSA nhiều cỡ. Cỡ lớn phủ vùng ML-DSA (pk+sig ~5,3 KB ở mức 65).
+KEY_BITS = (2048, 8192, 15360)
+# MTU quét. 102 = payload khung 802.15.4 sau MAC + AES-CCM*.
+MTUS = (102, 150, 200, 250, 300, 400, 600)
+PORT_BASE = 16400
+
+
+def sh(cmd, timeout=120):
+    try:
+        return subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=timeout)
+    except subprocess.TimeoutExpired:
+        return None
+
+
+def make_cert(bits):
+    os.makedirs(WORK, exist_ok=True)
+    key = os.path.join(WORK, "k%d.pem" % bits)
+    crt = os.path.join(WORK, "c%d.pem" % bits)
+    if not os.path.exists(crt):
+        sh("openssl req -x509 -newkey rsa:%d -keyout %s -out %s -days 2 -nodes "
+           "-subj '/CN=t' 2>/dev/null" % (bits, key, crt), timeout=600)
+    if not os.path.exists(crt):
+        return None
+    return key, crt, os.path.getsize(crt)
+
+
+# ---------------------------------------------------------------- cài đặt
+
+def probe_gnutls(crt, key, mtu, port):
+    """Trả về (thành công, giây). Câu 'Handshake was completed' chỉ ca THÀNH CÔNG mới in."""
+    srv = subprocess.Popen(
+        ["gnutls-serv", "--udp", "--port", str(port), "--mtu", str(mtu), "--nocookie",
+         "--x509certfile", crt, "--x509keyfile", key],
+        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, stdin=subprocess.DEVNULL)
+    time.sleep(1.2)
+    t0 = time.time()
+    r = sh("echo q | gnutls-cli --udp --port %d --mtu %d --insecure 127.0.0.1 2>&1" % (port, mtu))
+    dt = time.time() - t0
+    srv.terminate()
+    try:
+        srv.wait(timeout=5)
+    except subprocess.TimeoutExpired:
+        srv.kill()
+    ok = bool(r) and "Handshake was completed" in (r.stdout or "")
+    return ok, dt
+
+
+def probe_openssl(crt, key, mtu, port):
+    """OpenSSL thật (KHÔNG phải LibreSSL của Apple). Bằng chứng thành công là dòng
+    'Cipher    : <ten bo ma khong phai (NONE)>' -- phải kiểm CẢ giá trị, vì đầu ra của ca
+    HỎNG cũng chứa chữ 'Cipher'."""
+    srv = subprocess.Popen(
+        ["openssl", "s_server", "-dtls1_2", "-mtu", str(mtu), "-accept", str(port),
+         "-cert", crt, "-key", key, "-quiet"],
+        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, stdin=subprocess.DEVNULL)
+    time.sleep(1.0)
+    t0 = time.time()
+    r = sh("echo q | openssl s_client -dtls1_2 -mtu %d -connect 127.0.0.1:%d 2>&1" % (mtu, port))
+    dt = time.time() - t0
+    srv.terminate()
+    try:
+        srv.wait(timeout=5)
+    except subprocess.TimeoutExpired:
+        srv.kill()
+    out = (r.stdout or "") if r else ""
+    ok = False
+    for line in out.splitlines():
+        if "Cipher" in line and "(NONE)" not in line and "NONE" not in line.split(":")[-1]:
+            if len(line.split(":")[-1].strip()) > 3:
+                ok = True
+    return ok, dt
+
+
+IMPLS = []
+if shutil.which("gnutls-serv"):
+    v = sh("gnutls-serv --version 2>&1 | head -1")
+    IMPLS.append(("gnutls", (v.stdout or "").strip() if v else "gnutls", probe_gnutls))
+if shutil.which("openssl"):
+    v = sh("openssl version")
+    name = (v.stdout or "").strip() if v else "openssl"
+    # LibreSSL của macOS đã được xác nhận không bắt tay nổi với chính nó. Vẫn chạy để GHI
+    # NHẬN, nhưng phải gắn nhãn để không nhầm là bằng chứng về giao thức.
+    IMPLS.append(("openssl", name, probe_openssl))
+
+
+def main():
+    if not IMPLS:
+        print("  ⛔ khong tim thay cai dat DTLS nao"); return 1
+
+    print("  Cài đặt tìm thấy:")
+    for k, v, _ in IMPLS:
+        flag = "  ⚠ LibreSSL, đã biết là không bắt tay nổi trên macOS" if "LibreSSL" in v else ""
+        print("    %-8s %s%s" % (k, v, flag))
+    print()
+
+    results = []
+    port = PORT_BASE
+    for key_bits in KEY_BITS:
+        made = make_cert(key_bits)
+        if made is None:
+            print("  ⛔ khong sinh duoc chung thu %d" % key_bits); continue
+        key, crt, csize = made
+        print("  ══ chứng thư RSA-%d = %d byte ══" % (key_bits, csize))
+        print("  %-9s %6s %7s %10s %9s" % ("cài đặt", "MTU", "~mảnh", "kết quả", "giây"))
+        print("  " + "-" * 50)
+        for impl_key, impl_ver, probe in IMPLS:
+            for mtu in MTUS:
+                port += 1
+                frags = -(-csize // mtu)
+                ok, dt = probe(crt, key, mtu, port)
+                results.append({"impl": impl_key, "impl_version": impl_ver,
+                                "key_bits": key_bits, "cert_bytes": csize,
+                                "mtu": mtu, "frags_est": frags,
+                                "handshake_ok": ok, "seconds": round(dt, 2)})
+                print("  %-9s %6d %7d %10s %9.2f"
+                      % (impl_key, mtu, frags, "✅ xong" if ok else "⛔ hỏng", dt))
+        print()
+
+    # --- kết luận: ngưỡng của từng cài đặt, và có TRÙNG nhau không ---
+    print("  ═══ NGƯỠNG THEO TỪNG CÀI ĐẶT ═══")
+    thresholds = {}
+    for impl_key, impl_ver, _ in IMPLS:
+        rs = [r for r in results if r["impl"] == impl_key]
+        ok_f = [r["frags_est"] for r in rs if r["handshake_ok"]]
+        bad_f = [r["frags_est"] for r in rs if not r["handshake_ok"]]
+        if not ok_f:
+            print("  %-9s KHÔNG ca nào chạy ⇒ không dùng làm bằng chứng" % impl_key)
+            thresholds[impl_key] = None
+            continue
+        hi_ok, lo_bad = max(ok_f), (min(bad_f) if bad_f else None)
+        thresholds[impl_key] = {"max_ok_frags": hi_ok, "min_fail_frags": lo_bad}
+        if lo_bad is None:
+            print("  %-9s chạy được tới %d mảnh, KHÔNG ca nào hỏng" % (impl_key, hi_ok))
+        else:
+            print("  %-9s xong tới %d mảnh · hỏng từ %d mảnh" % (impl_key, hi_ok, lo_bad))
+
+    # --- tách giả thuyết (b) hết giờ khỏi (c) giới hạn số mảnh ---
+    print()
+    print("  ═══ TÁCH GIẢ THUYẾT: hết giờ (b) hay giới hạn số mảnh (c)? ═══")
+    fails = [r for r in results if not r["handshake_ok"] and r["seconds"] > 0]
+    oks = [r for r in results if r["handshake_ok"]]
+    if fails and oks:
+        mf = sum(r["seconds"] for r in fails) / len(fails)
+        mo = sum(r["seconds"] for r in oks) / len(oks)
+        print("  thời gian trung bình: ca hỏng %.2f s · ca xong %.2f s (gấp %.1f lần)"
+              % (mf, mo, mf / max(0.01, mo)))
+        if mf > 3 * mo:
+            print("  ⇒ ca hỏng tốn LÂU HƠN HẲN ⇒ nghiêng về (b) HẾT GIỜ truyền lại.")
+            print("    Hệ quả cho bài: đây là vấn đề THAM SỐ THỜI GIAN, phải nói đúng vậy,")
+            print("    và phải thử nới thời gian chờ trước khi kết luận bất cứ điều gì.")
+        else:
+            print("  ⇒ ca hỏng KHÔNG lâu hơn đáng kể ⇒ nghiêng về (c) GIỚI HẠN SỐ MẢNH.")
+    else:
+        print("  (không đủ dữ liệu hai phía để tách)")
+
+    # --- phán quyết cho bài ---
+    print()
+    print("  ═══ PHÁN QUYẾT ═══")
+    real = {k: v for k, v in thresholds.items() if v and v["min_fail_frags"] is not None}
+    if len(real) >= 2:
+        vals = [v["min_fail_frags"] for v in real.values()]
+        if max(vals) <= 2 * min(vals):
+            print("  ✅ NHIỀU cài đặt cùng gãy ở ngưỡng TƯƠNG ĐƯƠNG (%s mảnh)."
+                  % ", ".join(str(v) for v in sorted(vals)))
+            print("     ⇒ ĐƯỢC PHÉP viết như một giới hạn thực tiễn, kèm khai rõ cài đặt.")
+        else:
+            print("  ⚠ Các cài đặt gãy ở ngưỡng RẤT KHÁC nhau (%s)."
+                  % ", ".join(str(v) for v in sorted(vals)))
+            print("     ⇒ Đây là chuyện THAM SỐ CÀI ĐẶT, KHÔNG được viết thành tuyên bố về")
+            print("        giao thức. Phải nêu từng cài đặt riêng.")
+    elif len(real) == 1:
+        print("  ⛔ CHỈ MỘT cài đặt gãy. KHÔNG đủ để viết thành tuyên bố về giao thức.")
+        print("     Phải tìm thêm cài đặt thứ hai (wolfSSL, mbedTLS, tinydtls) trước khi tin.")
+    else:
+        print("  ⛔ KHÔNG cài đặt nào gãy trong dải đã quét ⇒ phát hiện của M2 KHÔNG tái lập")
+        print("     được ở đây. Phải đọc lại M2 trước khi dùng bất cứ số nào của nó.")
+
+    os.makedirs(os.path.dirname(OUT), exist_ok=True)
+    with open(OUT, "w", encoding="utf-8") as f:
+        json.dump({"implementations": [{"key": k, "version": v} for k, v, _ in IMPLS],
+                   "thresholds": thresholds, "rows": results}, f, indent=2, ensure_ascii=False)
+    print("\n  → %s" % os.path.relpath(OUT, os.path.dirname(HERE)))
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
