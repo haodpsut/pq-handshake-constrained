@@ -12,7 +12,7 @@
   "thresholds": {
     "gnutls": {
       "max_ok_frags": 22,
-      "min_fail_frags": 10
+      "min_fail_frags": 19
     },
     "openssl": null
   },
@@ -25,7 +25,8 @@
       "mtu": 102,
       "frags_est": 10,
       "handshake_ok": true,
-      "seconds": 6.43
+      "timed_out": false,
+      "seconds": 6.44
     },
     {
       "impl": "gnutls",
@@ -35,7 +36,8 @@
       "mtu": 150,
       "frags_est": 7,
       "handshake_ok": true,
-      "seconds": 3.7
+      "timed_out": false,
+      "seconds": 3.69
     },
     {
       "impl": "gnutls",
@@ -45,7 +47,8 @@
       "mtu": 200,
       "frags_est": 5,
       "handshake_ok": true,
-      "seconds": 3.26
+      "timed_out": false,
+      "seconds": 3.25
     },
     {
       "impl": "gnutls",
@@ -55,7 +58,8 @@
       "mtu": 250,
       "frags_est": 4,
       "handshake_ok": true,
-      "seconds": 2.94
+      "timed_out": false,
+      "seconds": 2.95
     },
     {
       "impl": "gnutls",
@@ -65,7 +69,8 @@
       "mtu": 300,
       "frags_est": 4,
       "handshake_ok": true,
-      "seconds": 2.95
+      "timed_out": false,
+      "seconds": 2.94
     },
     {
       "impl": "gnutls",
@@ -75,6 +80,7 @@
       "mtu": 400,
       "frags_est": 3,
       "handshake_ok": true,
+      "timed_out": false,
       "seconds": 2.73
     },
     {
@@ -85,7 +91,8 @@
       "mtu": 600,
       "frags_est": 2,
       "handshake_ok": true,
-      "seconds": 2.63
+      "timed_out": false,
+      "seconds": 2.62
     },
     {
       "impl": "openssl",
@@ -95,7 +102,8 @@
       "mtu": 102,
       "frags_est": 10,
       "handshake_ok": false,
-      "seconds": 0.01
+      "timed_out": false,
+      "seconds": 0.0
     },
     {
       "impl": "openssl",
@@ -105,7 +113,8 @@
       "mtu": 150,
       "frags_est": 7,
       "handshake_ok": false,
-      "seconds": 0.01
+      "timed_out": false,
+      "seconds": 0.0
     },
     {
       "impl": "openssl",
@@ -115,6 +124,7 @@
       "mtu": 200,
       "frags_est": 5,
       "handshake_ok": false,
+      "timed_out": false,
       "seconds": 0.01
     },
     {
@@ -125,7 +135,8 @@
       "mtu": 250,
       "frags_est": 4,
       "handshake_ok": false,
-      "seconds": 0.01
+      "timed_out": false,
+      "seconds": 0.0
     },
     {
       "impl": "openssl",
@@ -135,7 +146,8 @@
       "mtu": 300,
       "frags_est": 4,
       "handshake_ok": false,
-      "seconds": 120.0
+      "timed_out": true,
+      "seconds": 25.0
     },
     {
       "impl": "openssl",
@@ -145,7 +157,8 @@
       "mtu": 400,
       "frags_est": 3,
       "handshake_ok": false,
-      "seconds": 120.0
+      "timed_out": true,
+      "seconds": 25.0
     },
     {
       "impl": "openssl",
@@ -155,7 +168,8 @@
       "mtu": 600,
       "frags_est": 2,
       "handshake_ok": false,
-      "seconds": 120.0
+      "timed_out": true,
+      "seconds": 25.0
     },
     {
       "impl": "gnutls",
@@ -165,7 +179,8 @@
       "mtu": 102,
       "frags_est": 30,
       "handshake_ok": false,
-      "seconds": 46.04
+      "timed_out": true,
+      "seconds": 25.01
     },
     {
       "impl": "gnutls",
@@ -175,7 +190,8 @@
       "mtu": 150,
       "frags_est": 21,
       "handshake_ok": true,
-      "seconds": 8.82
+      "timed_out": false,
+      "seconds": 8.81
     },
     {
       "impl": "gnutls",
@@ -185,7 +201,8 @@
       "mtu": 200,
       "frags_est": 16,
       "handshake_ok": true,
-      "seconds": 7.19
+      "timed_out": false,
+      "seconds": 7.22
     },
     {
       "impl": "gnutls",
@@ -195,7 +212,8 @@
       "mtu": 250,
       "frags_est": 13,
       "handshake_ok": true,
-      "seconds": 5.88
+      "timed_out": false,
+      "seconds": 5.9
     },
     {
       "impl": "gnutls",
@@ -205,7 +223,8 @@
       "mtu": 300,
       "frags_est": 11,
       "handshake_ok": true,
-      "seconds": 5.46
+      "timed_out": false,
+      "seconds": 5.47
     },
     {
       "impl": "gnutls",
@@ -215,7 +234,8 @@
       "mtu": 400,
       "frags_est": 8,
       "handshake_ok": true,
-      "seconds": 3.44
+      "timed_out": false,
+      "seconds": 3.43
     },
     {
       "impl": "gnutls",
@@ -225,7 +245,8 @@
       "mtu": 600,
       "frags_est": 6,
       "handshake_ok": true,
-      "seconds": 3.01
+      "timed_out": false,
+      "seconds": 3.0
     },
     {
       "impl": "openssl",
@@ -235,7 +256,8 @@
       "mtu": 102,
       "frags_est": 30,
       "handshake_ok": false,
-      "seconds": 0.01
+      "timed_out": false,
+      "seconds": 0.0
     },
     {
       "impl": "openssl",
@@ -245,6 +267,7 @@
       "mtu": 150,
       "frags_est": 21,
       "handshake_ok": false,
+      "timed_out": false,
       "seconds": 0.01
     },
     {
@@ -255,7 +278,8 @@
       "mtu": 200,
       "frags_est": 16,
       "handshake_ok": false,
-      "seconds": 0.01
+      "timed_out": false,
+      "seconds": 0.0
     },
     {
       "impl": "openssl",
@@ -265,7 +289,8 @@
       "mtu": 250,
       "frags_est": 13,
       "handshake_ok": false,
-      "seconds": 0.01
+      "timed_out": false,
+      "seconds": 0.0
     },
     {
       "impl": "openssl",
@@ -275,7 +300,8 @@
       "mtu": 300,
       "frags_est": 11,
       "handshake_ok": false,
-      "seconds": 3940.7
+      "timed_out": true,
+      "seconds": 25.0
     },
     {
       "impl": "openssl",
@@ -285,7 +311,8 @@
       "mtu": 400,
       "frags_est": 8,
       "handshake_ok": false,
-      "seconds": 9993.51
+      "timed_out": true,
+      "seconds": 25.0
     },
     {
       "impl": "openssl",
@@ -295,7 +322,8 @@
       "mtu": 600,
       "frags_est": 6,
       "handshake_ok": false,
-      "seconds": 4395.13
+      "timed_out": true,
+      "seconds": 25.0
     },
     {
       "impl": "gnutls",
@@ -305,7 +333,8 @@
       "mtu": 102,
       "frags_est": 54,
       "handshake_ok": false,
-      "seconds": 575.73
+      "timed_out": true,
+      "seconds": 25.01
     },
     {
       "impl": "gnutls",
@@ -315,7 +344,8 @@
       "mtu": 150,
       "frags_est": 37,
       "handshake_ok": false,
-      "seconds": 3051.44
+      "timed_out": true,
+      "seconds": 25.01
     },
     {
       "impl": "gnutls",
@@ -325,7 +355,8 @@
       "mtu": 200,
       "frags_est": 28,
       "handshake_ok": false,
-      "seconds": 605.76
+      "timed_out": true,
+      "seconds": 25.01
     },
     {
       "impl": "gnutls",
@@ -335,7 +366,8 @@
       "mtu": 250,
       "frags_est": 22,
       "handshake_ok": true,
-      "seconds": 9.1
+      "timed_out": false,
+      "seconds": 9.06
     },
     {
       "impl": "gnutls",
@@ -344,8 +376,9 @@
       "cert_bytes": 5462,
       "mtu": 300,
       "frags_est": 19,
-      "handshake_ok": true,
-      "seconds": 8.1
+      "handshake_ok": false,
+      "timed_out": false,
+      "seconds": 283.0
     },
     {
       "impl": "gnutls",
@@ -355,7 +388,8 @@
       "mtu": 400,
       "frags_est": 14,
       "handshake_ok": true,
-      "seconds": 6.76
+      "timed_out": false,
+      "seconds": 6.49
     },
     {
       "impl": "gnutls",
@@ -364,8 +398,9 @@
       "cert_bytes": 5462,
       "mtu": 600,
       "frags_est": 10,
-      "handshake_ok": false,
-      "seconds": 916.72
+      "handshake_ok": true,
+      "timed_out": false,
+      "seconds": 5.09
     },
     {
       "impl": "openssl",
@@ -375,7 +410,8 @@
       "mtu": 102,
       "frags_est": 54,
       "handshake_ok": false,
-      "seconds": 0.01
+      "timed_out": false,
+      "seconds": 0.0
     },
     {
       "impl": "openssl",
@@ -385,6 +421,7 @@
       "mtu": 150,
       "frags_est": 37,
       "handshake_ok": false,
+      "timed_out": false,
       "seconds": 0.01
     },
     {
@@ -395,7 +432,8 @@
       "mtu": 200,
       "frags_est": 28,
       "handshake_ok": false,
-      "seconds": 0.01
+      "timed_out": false,
+      "seconds": 0.0
     },
     {
       "impl": "openssl",
@@ -405,7 +443,8 @@
       "mtu": 250,
       "frags_est": 22,
       "handshake_ok": false,
-      "seconds": 0.01
+      "timed_out": false,
+      "seconds": 0.0
     },
     {
       "impl": "openssl",
@@ -415,7 +454,8 @@
       "mtu": 300,
       "frags_est": 19,
       "handshake_ok": false,
-      "seconds": 12593.87
+      "timed_out": true,
+      "seconds": 25.0
     },
     {
       "impl": "openssl",
@@ -425,7 +465,8 @@
       "mtu": 400,
       "frags_est": 14,
       "handshake_ok": false,
-      "seconds": 7041.68
+      "timed_out": true,
+      "seconds": 25.0
     },
     {
       "impl": "openssl",
@@ -435,7 +476,8 @@
       "mtu": 600,
       "frags_est": 10,
       "handshake_ok": false,
-      "seconds": 5743.55
+      "timed_out": true,
+      "seconds": 25.0
     }
   ]
 }

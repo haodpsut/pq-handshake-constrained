@@ -35,6 +35,7 @@ Không cần GPU. Không cần cài PQC: chỉ cần chứng thư to dần, vì 
 
 import json
 import os
+import re
 import shutil
 import signal
 import subprocess
@@ -143,13 +144,33 @@ def probe_openssl(crt, key, mtu, port):
         srv.wait(timeout=5)
     except subprocess.TimeoutExpired:
         srv.kill()
-    ok = False
+    return openssl_handshake_ok(out), timed_out, dt
+
+
+def openssl_handshake_ok(out):
+    """⛔ BỘ DÒ CŨ CHO DƯƠNG TÍNH GIẢ TRÊN MỌI CA.
+
+    Nó nhận bất kỳ đuôi nào sau `Cipher :` dài hơn 3 ký tự và không chứa "NONE". Nhưng một
+    bắt tay HỎNG in `Cipher    : 0000` -- "0000" là mã bộ mã RỖNG, dài 4 ký tự, không chứa
+    "NONE". Nên MỌI ca hỏng đều được đọc thành công. Đây là lần thứ NĂM trong cùng đợt việc
+    mà bộ dò khớp hình thức thay vì bản chất, và là lần đầu cho DƯƠNG TÍNH giả.
+
+    Bộ dò đúng phải đòi bằng chứng chỉ ca THÀNH CÔNG mới sinh ra được:
+      - dòng "SSL handshake has read N bytes" với N > 0  (ca hỏng luôn đọc 0 byte), VÀ
+      - tên bộ mã thật, không phải 0000 / (NONE).
+    """
+    read_bytes = 0
+    m = re.search(r"handshake has read\s+(\d+)\s+bytes", out)
+    if m:
+        read_bytes = int(m.group(1))
+    named = False
     for line in out.splitlines():
-        if "Cipher" in line:
-            tail = line.split(":")[-1].strip()
-            if tail and "NONE" not in tail and len(tail) > 3:
-                ok = True
-    return ok, timed_out, dt
+        m2 = re.match(r"\s*Cipher\s*:\s*(\S+)\s*$", line)
+        if m2:
+            v = m2.group(1)
+            if v not in ("0000", "(NONE)", "NONE") and not v.strip("0") == "":
+                named = True
+    return read_bytes > 0 and named
 
 
 IMPLS = []
@@ -173,6 +194,37 @@ def main():
         flag = "  ⚠ LibreSSL, đã biết là không bắt tay nổi trên macOS" if "LibreSSL" in v else ""
         print("    %-8s %s%s" % (k, v, flag))
     print()
+
+    # ══════════════════════════════════════════════════════════════════════════════════
+    # CHỨNG DƯƠNG TÍNH BẮT BUỘC. Cài đặt nào không bắt tay nổi ở cấu hình DỄ NHẤT (chứng
+    # thư nhỏ, MTU rộng) thì BỊ LOẠI, không được quét, vì mọi ô của nó sẽ vô nghĩa.
+    #
+    # Đây là sửa CẤU TRÚC sau NĂM lần cùng một lớp lỗi trong một đợt việc: bốn lần âm tính
+    # giả, một lần dương tính giả. Bài học chung của cả năm: BỘ DÒ PHẢI ĐƯỢC THỬ TRÊN MỘT CA
+    # ĐÃ BIẾT ĐÚNG, TRƯỚC KHI QUÉT. Nếu ca đó trượt thì dữ liệu không tồn tại, và im lặng bỏ
+    # qua là cách sinh ra bảng đẹp mà rỗng.
+    # ══════════════════════════════════════════════════════════════════════════════════
+    made = make_cert(min(KEY_BITS))
+    if made is None:
+        print("  ⛔ khong sinh duoc chung thu de chay chung duong tinh"); return 1
+    ck, cc, _ = made
+    print("  ═══ CHỨNG DƯƠNG TÍNH (chứng thư nhỏ nhất, MTU 1400) ═══")
+    usable = []
+    port_ctl = PORT_BASE - 100
+    for impl_key, impl_ver, probe in IMPLS:
+        port_ctl += 1
+        ok, timed_out, dt = probe(cc, ck, 1400, port_ctl)
+        print("    %-8s %s  (%.2f s)"
+              % (impl_key, "✅ bắt tay được ⇒ DÙNG ĐƯỢC"
+                 if ok else "⛔ KHÔNG bắt tay nổi ⇒ LOẠI, mọi số của nó sẽ vô nghĩa", dt))
+        if ok:
+            usable.append((impl_key, impl_ver, probe))
+    print()
+    if not usable:
+        print("  ⛔ KHÔNG cài đặt nào qua chứng dương tính. DỪNG, không sinh dữ liệu.")
+        print("     Sửa môi trường trước. Quét tiếp chỉ tạo ra bảng rỗng trông như dữ liệu.")
+        return 2
+    IMPLS[:] = usable
 
     results = []
     port = PORT_BASE
