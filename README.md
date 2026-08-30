@@ -67,9 +67,28 @@ and writes machine-readable JSON to `results/`.
 |---|---|
 | CoAP block-wise costs one round trip per block | ✅ measured, aiocoap, 7/7 agreement with the model |
 | DTLS round trips stay constant as the handshake grows | ✅ measured, GnuTLS, datagrams ×1.37 while round trips ×1.00 |
-| DTLS **fails to complete** past ~23 fragments | ⚠ **one implementation only** (GnuTLS 3.8.13). `m3` exists to test this against others. Do not cite until it reproduces. |
+| DTLS **fails to complete** past ~23 fragments | ⛔ **RETRACTED.** It did not reproduce under a systematic sweep: GnuTLS fails at 10 fragments (MTU 600) yet succeeds at 22 (MTU 250), so no threshold exists. The original observation was an artefact of a broken harness, see below. |
 | DTLS 1.3 completes in 2 round trips | 📚 cited from RFC 9147, **not** measured here: no DTLS 1.3 implementation was available |
 | Latency and energy on a real 802.15.4 mesh | ⛔ **not measured.** Round-trip counts here are transport-level, on loopback. |
+
+## A retracted finding, kept on the record
+
+An earlier version of `m2` appeared to show that DTLS handshakes fail once a handshake message
+exceeds roughly 23 fragments, which would have been a striking result at post-quantum sizes.
+It was wrong, and the way it was wrong is worth stating.
+
+The probe ran `echo q | gnutls-cli ...` through `subprocess.run(shell=True, timeout=...)`. On
+timeout Python kills the *shell*, but the client process survives holding the pipe, so the
+read blocks indefinitely. The tell was in the data: a timeout set to 120 s recorded elapsed
+times of up to **12,593 s**, longer than the entire run. Cases where the harness gave up were
+being recorded as handshake failures.
+
+`m3` now separates three outcomes rather than two (`ok`, `timed_out`, genuine failure), runs
+probes without a shell pipeline, and kills the whole process group on timeout. Collapsing
+"timed out" into "failed" is how a convincing but non-existent threshold gets manufactured.
+
+What survives untouched is the flight-versus-block-wise comparison, because it is measured by
+counting datagrams at a relay rather than through that harness.
 
 ## Known environment traps
 

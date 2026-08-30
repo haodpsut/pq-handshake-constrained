@@ -1,0 +1,441 @@
+{
+  "implementations": [
+    {
+      "key": "gnutls",
+      "version": "gnutls-serv 3.8.13"
+    },
+    {
+      "key": "openssl",
+      "version": "LibreSSL 3.3.6"
+    }
+  ],
+  "thresholds": {
+    "gnutls": {
+      "max_ok_frags": 22,
+      "min_fail_frags": 10
+    },
+    "openssl": null
+  },
+  "rows": [
+    {
+      "impl": "gnutls",
+      "impl_version": "gnutls-serv 3.8.13",
+      "key_bits": 2048,
+      "cert_bytes": 956,
+      "mtu": 102,
+      "frags_est": 10,
+      "handshake_ok": true,
+      "seconds": 6.43
+    },
+    {
+      "impl": "gnutls",
+      "impl_version": "gnutls-serv 3.8.13",
+      "key_bits": 2048,
+      "cert_bytes": 956,
+      "mtu": 150,
+      "frags_est": 7,
+      "handshake_ok": true,
+      "seconds": 3.7
+    },
+    {
+      "impl": "gnutls",
+      "impl_version": "gnutls-serv 3.8.13",
+      "key_bits": 2048,
+      "cert_bytes": 956,
+      "mtu": 200,
+      "frags_est": 5,
+      "handshake_ok": true,
+      "seconds": 3.26
+    },
+    {
+      "impl": "gnutls",
+      "impl_version": "gnutls-serv 3.8.13",
+      "key_bits": 2048,
+      "cert_bytes": 956,
+      "mtu": 250,
+      "frags_est": 4,
+      "handshake_ok": true,
+      "seconds": 2.94
+    },
+    {
+      "impl": "gnutls",
+      "impl_version": "gnutls-serv 3.8.13",
+      "key_bits": 2048,
+      "cert_bytes": 956,
+      "mtu": 300,
+      "frags_est": 4,
+      "handshake_ok": true,
+      "seconds": 2.95
+    },
+    {
+      "impl": "gnutls",
+      "impl_version": "gnutls-serv 3.8.13",
+      "key_bits": 2048,
+      "cert_bytes": 956,
+      "mtu": 400,
+      "frags_est": 3,
+      "handshake_ok": true,
+      "seconds": 2.73
+    },
+    {
+      "impl": "gnutls",
+      "impl_version": "gnutls-serv 3.8.13",
+      "key_bits": 2048,
+      "cert_bytes": 956,
+      "mtu": 600,
+      "frags_est": 2,
+      "handshake_ok": true,
+      "seconds": 2.63
+    },
+    {
+      "impl": "openssl",
+      "impl_version": "LibreSSL 3.3.6",
+      "key_bits": 2048,
+      "cert_bytes": 956,
+      "mtu": 102,
+      "frags_est": 10,
+      "handshake_ok": false,
+      "seconds": 0.01
+    },
+    {
+      "impl": "openssl",
+      "impl_version": "LibreSSL 3.3.6",
+      "key_bits": 2048,
+      "cert_bytes": 956,
+      "mtu": 150,
+      "frags_est": 7,
+      "handshake_ok": false,
+      "seconds": 0.01
+    },
+    {
+      "impl": "openssl",
+      "impl_version": "LibreSSL 3.3.6",
+      "key_bits": 2048,
+      "cert_bytes": 956,
+      "mtu": 200,
+      "frags_est": 5,
+      "handshake_ok": false,
+      "seconds": 0.01
+    },
+    {
+      "impl": "openssl",
+      "impl_version": "LibreSSL 3.3.6",
+      "key_bits": 2048,
+      "cert_bytes": 956,
+      "mtu": 250,
+      "frags_est": 4,
+      "handshake_ok": false,
+      "seconds": 0.01
+    },
+    {
+      "impl": "openssl",
+      "impl_version": "LibreSSL 3.3.6",
+      "key_bits": 2048,
+      "cert_bytes": 956,
+      "mtu": 300,
+      "frags_est": 4,
+      "handshake_ok": false,
+      "seconds": 120.0
+    },
+    {
+      "impl": "openssl",
+      "impl_version": "LibreSSL 3.3.6",
+      "key_bits": 2048,
+      "cert_bytes": 956,
+      "mtu": 400,
+      "frags_est": 3,
+      "handshake_ok": false,
+      "seconds": 120.0
+    },
+    {
+      "impl": "openssl",
+      "impl_version": "LibreSSL 3.3.6",
+      "key_bits": 2048,
+      "cert_bytes": 956,
+      "mtu": 600,
+      "frags_est": 2,
+      "handshake_ok": false,
+      "seconds": 120.0
+    },
+    {
+      "impl": "gnutls",
+      "impl_version": "gnutls-serv 3.8.13",
+      "key_bits": 8192,
+      "cert_bytes": 3036,
+      "mtu": 102,
+      "frags_est": 30,
+      "handshake_ok": false,
+      "seconds": 46.04
+    },
+    {
+      "impl": "gnutls",
+      "impl_version": "gnutls-serv 3.8.13",
+      "key_bits": 8192,
+      "cert_bytes": 3036,
+      "mtu": 150,
+      "frags_est": 21,
+      "handshake_ok": true,
+      "seconds": 8.82
+    },
+    {
+      "impl": "gnutls",
+      "impl_version": "gnutls-serv 3.8.13",
+      "key_bits": 8192,
+      "cert_bytes": 3036,
+      "mtu": 200,
+      "frags_est": 16,
+      "handshake_ok": true,
+      "seconds": 7.19
+    },
+    {
+      "impl": "gnutls",
+      "impl_version": "gnutls-serv 3.8.13",
+      "key_bits": 8192,
+      "cert_bytes": 3036,
+      "mtu": 250,
+      "frags_est": 13,
+      "handshake_ok": true,
+      "seconds": 5.88
+    },
+    {
+      "impl": "gnutls",
+      "impl_version": "gnutls-serv 3.8.13",
+      "key_bits": 8192,
+      "cert_bytes": 3036,
+      "mtu": 300,
+      "frags_est": 11,
+      "handshake_ok": true,
+      "seconds": 5.46
+    },
+    {
+      "impl": "gnutls",
+      "impl_version": "gnutls-serv 3.8.13",
+      "key_bits": 8192,
+      "cert_bytes": 3036,
+      "mtu": 400,
+      "frags_est": 8,
+      "handshake_ok": true,
+      "seconds": 3.44
+    },
+    {
+      "impl": "gnutls",
+      "impl_version": "gnutls-serv 3.8.13",
+      "key_bits": 8192,
+      "cert_bytes": 3036,
+      "mtu": 600,
+      "frags_est": 6,
+      "handshake_ok": true,
+      "seconds": 3.01
+    },
+    {
+      "impl": "openssl",
+      "impl_version": "LibreSSL 3.3.6",
+      "key_bits": 8192,
+      "cert_bytes": 3036,
+      "mtu": 102,
+      "frags_est": 30,
+      "handshake_ok": false,
+      "seconds": 0.01
+    },
+    {
+      "impl": "openssl",
+      "impl_version": "LibreSSL 3.3.6",
+      "key_bits": 8192,
+      "cert_bytes": 3036,
+      "mtu": 150,
+      "frags_est": 21,
+      "handshake_ok": false,
+      "seconds": 0.01
+    },
+    {
+      "impl": "openssl",
+      "impl_version": "LibreSSL 3.3.6",
+      "key_bits": 8192,
+      "cert_bytes": 3036,
+      "mtu": 200,
+      "frags_est": 16,
+      "handshake_ok": false,
+      "seconds": 0.01
+    },
+    {
+      "impl": "openssl",
+      "impl_version": "LibreSSL 3.3.6",
+      "key_bits": 8192,
+      "cert_bytes": 3036,
+      "mtu": 250,
+      "frags_est": 13,
+      "handshake_ok": false,
+      "seconds": 0.01
+    },
+    {
+      "impl": "openssl",
+      "impl_version": "LibreSSL 3.3.6",
+      "key_bits": 8192,
+      "cert_bytes": 3036,
+      "mtu": 300,
+      "frags_est": 11,
+      "handshake_ok": false,
+      "seconds": 3940.7
+    },
+    {
+      "impl": "openssl",
+      "impl_version": "LibreSSL 3.3.6",
+      "key_bits": 8192,
+      "cert_bytes": 3036,
+      "mtu": 400,
+      "frags_est": 8,
+      "handshake_ok": false,
+      "seconds": 9993.51
+    },
+    {
+      "impl": "openssl",
+      "impl_version": "LibreSSL 3.3.6",
+      "key_bits": 8192,
+      "cert_bytes": 3036,
+      "mtu": 600,
+      "frags_est": 6,
+      "handshake_ok": false,
+      "seconds": 4395.13
+    },
+    {
+      "impl": "gnutls",
+      "impl_version": "gnutls-serv 3.8.13",
+      "key_bits": 15360,
+      "cert_bytes": 5462,
+      "mtu": 102,
+      "frags_est": 54,
+      "handshake_ok": false,
+      "seconds": 575.73
+    },
+    {
+      "impl": "gnutls",
+      "impl_version": "gnutls-serv 3.8.13",
+      "key_bits": 15360,
+      "cert_bytes": 5462,
+      "mtu": 150,
+      "frags_est": 37,
+      "handshake_ok": false,
+      "seconds": 3051.44
+    },
+    {
+      "impl": "gnutls",
+      "impl_version": "gnutls-serv 3.8.13",
+      "key_bits": 15360,
+      "cert_bytes": 5462,
+      "mtu": 200,
+      "frags_est": 28,
+      "handshake_ok": false,
+      "seconds": 605.76
+    },
+    {
+      "impl": "gnutls",
+      "impl_version": "gnutls-serv 3.8.13",
+      "key_bits": 15360,
+      "cert_bytes": 5462,
+      "mtu": 250,
+      "frags_est": 22,
+      "handshake_ok": true,
+      "seconds": 9.1
+    },
+    {
+      "impl": "gnutls",
+      "impl_version": "gnutls-serv 3.8.13",
+      "key_bits": 15360,
+      "cert_bytes": 5462,
+      "mtu": 300,
+      "frags_est": 19,
+      "handshake_ok": true,
+      "seconds": 8.1
+    },
+    {
+      "impl": "gnutls",
+      "impl_version": "gnutls-serv 3.8.13",
+      "key_bits": 15360,
+      "cert_bytes": 5462,
+      "mtu": 400,
+      "frags_est": 14,
+      "handshake_ok": true,
+      "seconds": 6.76
+    },
+    {
+      "impl": "gnutls",
+      "impl_version": "gnutls-serv 3.8.13",
+      "key_bits": 15360,
+      "cert_bytes": 5462,
+      "mtu": 600,
+      "frags_est": 10,
+      "handshake_ok": false,
+      "seconds": 916.72
+    },
+    {
+      "impl": "openssl",
+      "impl_version": "LibreSSL 3.3.6",
+      "key_bits": 15360,
+      "cert_bytes": 5462,
+      "mtu": 102,
+      "frags_est": 54,
+      "handshake_ok": false,
+      "seconds": 0.01
+    },
+    {
+      "impl": "openssl",
+      "impl_version": "LibreSSL 3.3.6",
+      "key_bits": 15360,
+      "cert_bytes": 5462,
+      "mtu": 150,
+      "frags_est": 37,
+      "handshake_ok": false,
+      "seconds": 0.01
+    },
+    {
+      "impl": "openssl",
+      "impl_version": "LibreSSL 3.3.6",
+      "key_bits": 15360,
+      "cert_bytes": 5462,
+      "mtu": 200,
+      "frags_est": 28,
+      "handshake_ok": false,
+      "seconds": 0.01
+    },
+    {
+      "impl": "openssl",
+      "impl_version": "LibreSSL 3.3.6",
+      "key_bits": 15360,
+      "cert_bytes": 5462,
+      "mtu": 250,
+      "frags_est": 22,
+      "handshake_ok": false,
+      "seconds": 0.01
+    },
+    {
+      "impl": "openssl",
+      "impl_version": "LibreSSL 3.3.6",
+      "key_bits": 15360,
+      "cert_bytes": 5462,
+      "mtu": 300,
+      "frags_est": 19,
+      "handshake_ok": false,
+      "seconds": 12593.87
+    },
+    {
+      "impl": "openssl",
+      "impl_version": "LibreSSL 3.3.6",
+      "key_bits": 15360,
+      "cert_bytes": 5462,
+      "mtu": 400,
+      "frags_est": 14,
+      "handshake_ok": false,
+      "seconds": 7041.68
+    },
+    {
+      "impl": "openssl",
+      "impl_version": "LibreSSL 3.3.6",
+      "key_bits": 15360,
+      "cert_bytes": 5462,
+      "mtu": 600,
+      "frags_est": 10,
+      "handshake_ok": false,
+      "seconds": 5743.55
+    }
+  ]
+}

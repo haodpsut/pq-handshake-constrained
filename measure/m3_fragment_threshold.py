@@ -36,6 +36,7 @@ Không cần GPU. Không cần cài PQC: chỉ cần chứng thư to dần, vì 
 import json
 import os
 import shutil
+import signal
 import subprocess
 import sys
 import time
@@ -49,9 +50,44 @@ KEY_BITS = (2048, 8192, 15360)
 # MTU quét. 102 = payload khung 802.15.4 sau MAC + AES-CCM*.
 MTUS = (102, 150, 200, 250, 300, 400, 600)
 PORT_BASE = 16400
+# Giới hạn cứng mỗi lần dò. Ca vượt giới hạn được ghi là TIMED_OUT, KHÔNG phải "hỏng".
+PROBE_TIMEOUT = 25
+
+
+# ⛔ BẢN TRƯỚC CỦA HÀM NÀY LÀM HỎNG CẢ PHÉP ĐO. Nó dùng shell=True với ĐƯỜNG ỐNG
+# (`echo q | gnutls-cli ...`). Khi hết giờ, Python giết cái SHELL nhưng tiến trình CON vẫn
+# sống và giữ ống, nên lệnh đọc treo vô hạn. Hệ quả: timeout 120 s mà đo ra 12.593 s, và
+# nhiều ca bị ghi là "bắt tay hỏng" trong khi thật ra là HARNESS BỎ CUỘC.
+#
+# Đây là lần thứ tư trong cùng một đợt việc lẫn "công cụ hỏng" với "kết quả âm". Nên bản này
+# PHÂN BIỆT HAI THỨ ĐÓ TRONG DỮ LIỆU RA: `ok` và `timed_out` là hai trường riêng.
+
+def run_proc(argv, stdin_bytes=b"q\n", timeout=30):
+    """Chạy một tiến trình, KHÔNG qua shell, KHÔNG đường ống.
+
+    Trả về (stdout+stderr, đã_hết_giờ, số_giây). Khi hết giờ thì giết CẢ NHÓM tiến trình,
+    nếu không thì tiến trình con sống sót và treo lần đọc kế tiếp.
+    """
+    t0 = time.time()
+    p = subprocess.Popen(argv, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                         stderr=subprocess.STDOUT, start_new_session=True)
+    try:
+        out, _ = p.communicate(input=stdin_bytes, timeout=timeout)
+        return out.decode("utf-8", "replace"), False, time.time() - t0
+    except subprocess.TimeoutExpired:
+        try:
+            os.killpg(os.getpgid(p.pid), signal.SIGKILL)
+        except Exception:                                       # noqa: BLE001
+            p.kill()
+        try:
+            out, _ = p.communicate(timeout=5)
+        except Exception:                                       # noqa: BLE001
+            out = b""
+        return out.decode("utf-8", "replace"), True, time.time() - t0
 
 
 def sh(cmd, timeout=120):
+    """CHỈ dùng cho lệnh phụ trợ (sinh chứng thư, hỏi phiên bản), KHÔNG dùng để đo."""
     try:
         return subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=timeout)
     except subprocess.TimeoutExpired:
@@ -79,16 +115,15 @@ def probe_gnutls(crt, key, mtu, port):
          "--x509certfile", crt, "--x509keyfile", key],
         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, stdin=subprocess.DEVNULL)
     time.sleep(1.2)
-    t0 = time.time()
-    r = sh("echo q | gnutls-cli --udp --port %d --mtu %d --insecure 127.0.0.1 2>&1" % (port, mtu))
-    dt = time.time() - t0
+    out, timed_out, dt = run_proc(
+        ["gnutls-cli", "--udp", "--port", str(port), "--mtu", str(mtu),
+         "--insecure", "127.0.0.1"], timeout=PROBE_TIMEOUT)
     srv.terminate()
     try:
         srv.wait(timeout=5)
     except subprocess.TimeoutExpired:
         srv.kill()
-    ok = bool(r) and "Handshake was completed" in (r.stdout or "")
-    return ok, dt
+    return ("Handshake was completed" in out), timed_out, dt
 
 
 def probe_openssl(crt, key, mtu, port):
@@ -100,21 +135,21 @@ def probe_openssl(crt, key, mtu, port):
          "-cert", crt, "-key", key, "-quiet"],
         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, stdin=subprocess.DEVNULL)
     time.sleep(1.0)
-    t0 = time.time()
-    r = sh("echo q | openssl s_client -dtls1_2 -mtu %d -connect 127.0.0.1:%d 2>&1" % (mtu, port))
-    dt = time.time() - t0
+    out, timed_out, dt = run_proc(
+        ["openssl", "s_client", "-dtls1_2", "-mtu", str(mtu),
+         "-connect", "127.0.0.1:%d" % port], timeout=PROBE_TIMEOUT)
     srv.terminate()
     try:
         srv.wait(timeout=5)
     except subprocess.TimeoutExpired:
         srv.kill()
-    out = (r.stdout or "") if r else ""
     ok = False
     for line in out.splitlines():
-        if "Cipher" in line and "(NONE)" not in line and "NONE" not in line.split(":")[-1]:
-            if len(line.split(":")[-1].strip()) > 3:
+        if "Cipher" in line:
+            tail = line.split(":")[-1].strip()
+            if tail and "NONE" not in tail and len(tail) > 3:
                 ok = True
-    return ok, dt
+    return ok, timed_out, dt
 
 
 IMPLS = []
@@ -153,13 +188,15 @@ def main():
             for mtu in MTUS:
                 port += 1
                 frags = -(-csize // mtu)
-                ok, dt = probe(crt, key, mtu, port)
+                ok, timed_out, dt = probe(crt, key, mtu, port)
                 results.append({"impl": impl_key, "impl_version": impl_ver,
                                 "key_bits": key_bits, "cert_bytes": csize,
                                 "mtu": mtu, "frags_est": frags,
-                                "handshake_ok": ok, "seconds": round(dt, 2)})
-                print("  %-9s %6d %7d %10s %9.2f"
-                      % (impl_key, mtu, frags, "✅ xong" if ok else "⛔ hỏng", dt))
+                                "handshake_ok": ok, "timed_out": timed_out,
+                                "seconds": round(dt, 2)})
+                # BA trạng thái, không phải hai. "Hết giờ" KHÔNG được gộp vào "hỏng".
+                label = "✅ xong" if ok else ("⏱ hết giờ" if timed_out else "⛔ hỏng")
+                print("  %-9s %6d %7d %10s %9.2f" % (impl_key, mtu, frags, label, dt))
         print()
 
     # --- kết luận: ngưỡng của từng cài đặt, và có TRÙNG nhau không ---
