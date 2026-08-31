@@ -198,13 +198,20 @@ def probe_mbedtls(crt, key, mtu, port):
     time.sleep(1.0)
     out, timed_out, dt = run_proc(
         [MBEDTLS_CLIENT, "dtls=1", "server_port=%d" % port, "mtu=%d" % mtu,
-         "server_addr=127.0.0.1", "auth_mode=none", "max_frag_len=0"],
+         "server_addr=127.0.0.1", "auth_mode=none"],
         stdin_bytes=b"", timeout=PROBE_TIMEOUT)
     srv.terminate()
     try:
         srv.wait(timeout=5)
     except subprocess.TimeoutExpired:
         srv.kill()
+    # Phân biệt "lệnh gọi SAI" với "bắt tay HỎNG". Trước đó tôi truyền max_frag_len=0, một
+    # giá trị không hợp lệ, nên ssl_client2 in usage rồi thoát trong 0,00 s. Chứng dương tính
+    # bắt được và loại mbedTLS, nhưng nếu chỉ nhìn cột kết quả thì trông y hệt "không bắt tay
+    # nổi". Hai thứ đó phải nhìn ra được từ dữ liệu.
+    if "unrecognized value" in out or out.lstrip().startswith("usage:"):
+        raise RuntimeError("goi ssl_client2 SAI THAM SO, khong phai bat tay hong:\n" +
+                           out[:200])
     ok = bool(re.search(r"Ciphersuite is TLS-\S+", out))
     return ok, timed_out, dt
 
