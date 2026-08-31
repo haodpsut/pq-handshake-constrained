@@ -1,0 +1,76 @@
+  Cài đặt tìm thấy:
+    gnutls   gnutls-serv 3.8.13
+    openssl  OpenSSL 3.6.4 25 Aug 2026 (Library: OpenSSL 3.6.4 25 Aug 2026)
+
+  ═══ CHỨNG DƯƠNG TÍNH (chứng thư nhỏ nhất, MTU 1400) ═══
+    gnutls   ✅ bắt tay được ⇒ DÙNG ĐƯỢC  (2.47 s)
+    openssl  ✅ bắt tay được ⇒ DÙNG ĐƯỢC  (0.03 s)
+
+  ══ chứng thư RSA-2048 = 1090 byte ══
+  cài đặt      MTU   ~mảnh    kết quả      giây
+  --------------------------------------------------
+  gnutls       102      11     ✅ xong      6.54
+  gnutls       150       8     ✅ xong      4.88
+  gnutls       200       6     ✅ xong      3.28
+  gnutls       250       5     ✅ xong      2.97
+  gnutls       300       4     ✅ xong      2.87
+  gnutls       400       3     ✅ xong      2.77
+  gnutls       600       2     ✅ xong      2.57
+  openssl      102      11     ⛔ hỏng      0.03
+  openssl      150       8     ⛔ hỏng      0.03
+  openssl      200       6     ⛔ hỏng      0.03
+  openssl      250       5     ⛔ hỏng      0.03
+  openssl      300       4     ✅ xong      0.04
+  openssl      400       3     ✅ xong      0.03
+  openssl      600       2     ✅ xong      0.04
+
+  ══ chứng thư RSA-8192 = 3170 byte ══
+  cài đặt      MTU   ~mảnh    kết quả      giây
+  --------------------------------------------------
+  gnutls       102      32  ⏱ hết giờ     25.03
+  gnutls       150      22     ✅ xong      8.58
+  gnutls       200      16     ✅ xong      7.07
+  gnutls       250      13     ✅ xong      5.87
+  gnutls       300      11     ✅ xong      5.26
+  gnutls       400       8     ✅ xong      4.66
+  gnutls       600       6     ✅ xong      3.06
+  openssl      102      32     ⛔ hỏng      0.03
+  openssl      150      22     ⛔ hỏng      0.03
+  openssl      200      16     ⛔ hỏng      0.03
+  openssl      250      13     ⛔ hỏng      0.03
+  openssl      300      11     ✅ xong      0.09
+  openssl      400       8     ✅ xong      0.09
+  openssl      600       6     ✅ xong      0.08
+
+  ══ chứng thư RSA-15360 = 5600 byte ══
+  cài đặt      MTU   ~mảnh    kết quả      giây
+  --------------------------------------------------
+  gnutls       102      55  ⏱ hết giờ     25.03
+  gnutls       150      38  ⏱ hết giờ     25.03
+  gnutls       200      28  ⏱ hết giờ     25.03
+  gnutls       250      23     ✅ xong      8.60
+  gnutls       300      19     ✅ xong      7.60
+  gnutls       400      14     ✅ xong      6.39
+  gnutls       600      10     ✅ xong      5.29
+  openssl      102      55     ⛔ hỏng      0.03
+  openssl      150      38     ⛔ hỏng      0.03
+  openssl      200      28     ⛔ hỏng      0.03
+  openssl      250      23     ⛔ hỏng      0.03
+  openssl      300      19     ✅ xong      0.25
+  openssl      400      14     ✅ xong      0.23
+  openssl      600      10     ✅ xong      0.25
+
+  ═══ NGƯỠNG THEO TỪNG CÀI ĐẶT ═══
+  gnutls    xong tới 23 mảnh · hỏng từ 28 mảnh
+  openssl   xong tới 19 mảnh · hỏng từ 5 mảnh
+
+  ═══ TÁCH GIẢ THUYẾT: hết giờ (b) hay giới hạn số mảnh (c)? ═══
+  thời gian trung bình: ca hỏng 6.28 s · ca xong 3.44 s (gấp 1.8 lần)
+  ⇒ ca hỏng KHÔNG lâu hơn đáng kể ⇒ nghiêng về (c) GIỚI HẠN SỐ MẢNH.
+
+  ═══ PHÁN QUYẾT ═══
+  ⚠ Các cài đặt gãy ở ngưỡng RẤT KHÁC nhau (5, 28).
+     ⇒ Đây là chuyện THAM SỐ CÀI ĐẶT, KHÔNG được viết thành tuyên bố về
+        giao thức. Phải nêu từng cài đặt riêng.
+
+  → results/m3_fragment_threshold.json

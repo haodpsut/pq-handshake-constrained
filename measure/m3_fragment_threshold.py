@@ -49,7 +49,14 @@ OUT = os.path.join(os.path.dirname(HERE), "results", "m3_fragment_threshold.json
 # Chứng thư RSA nhiều cỡ. Cỡ lớn phủ vùng ML-DSA (pk+sig ~5,3 KB ở mức 65).
 KEY_BITS = (2048, 8192, 15360)
 # MTU quét. 102 = payload khung 802.15.4 sau MAC + AES-CCM*.
-MTUS = (102, 150, 200, 250, 300, 400, 600)
+# Đổi được bằng biến môi trường để dò ranh giới mịn mà KHÔNG phải viết script rời.
+# ⚠ Lý do có tuỳ chọn này: mỗi lần tôi tự chế một biến thể ad-hoc để dò nhanh, nó lại khác
+# harness ở một chi tiết (stdin, thời gian chờ server) và cho kết quả MÂU THUẪN với harness.
+# Đã xảy ra hai lần. Quy tắc: mọi phép dò phải chạy qua ĐÚNG hàm đã qua chứng dương tính.
+MTUS = tuple(int(x) for x in os.environ["PQHS_MTUS"].split(",")) \
+    if os.environ.get("PQHS_MTUS") else (102, 150, 200, 250, 300, 400, 600)
+KEY_BITS = tuple(int(x) for x in os.environ["PQHS_KEYBITS"].split(",")) \
+    if os.environ.get("PQHS_KEYBITS") else KEY_BITS
 PORT_BASE = 16400
 # Giới hạn cứng mỗi lần dò. Ca vượt giới hạn được ghi là TIMED_OUT, KHÔNG phải "hỏng".
 PROBE_TIMEOUT = 25
@@ -251,8 +258,40 @@ def main():
                 print("  %-9s %6d %7d %10s %9.2f" % (impl_key, mtu, frags, label, dt))
         print()
 
-    # --- kết luận: ngưỡng của từng cài đặt, và có TRÙNG nhau không ---
-    print("  ═══ NGƯỠNG THEO TỪNG CÀI ĐẶT ═══")
+    # --- ranh giới nằm trên TRỤC NÀO: số mảnh hay MTU? ---
+    # ⛔ Bản trước GIẢ ĐỊNH ranh giới là số mảnh và in "openssl xong tới 19 mảnh, hỏng từ 5
+    # mảnh", một câu vô nghĩa vì hai khoảng CHỒNG LẤN. Ranh giới có thể nằm trên trục khác,
+    # và việc đầu tiên phải làm là HỎI trục nào tách được dữ liệu, chứ không phải giả định.
+    print("  ═══ RANH GIỚI NẰM TRÊN TRỤC NÀO? ═══")
+    print("  Một trục 'tách được' khi mọi ca chạy nằm hẳn một bên mọi ca hỏng.")
+    for impl_key, _, _ in IMPLS:
+        rs = [r for r in results if r["impl"] == impl_key]
+        if not rs:
+            continue
+        verdicts = []
+        for axis, lo_is_ok in (("frags_est", True), ("mtu", False)):
+            ok_v = [r[axis] for r in rs if r["handshake_ok"]]
+            bad_v = [r[axis] for r in rs if not r["handshake_ok"]]
+            if not ok_v or not bad_v:
+                verdicts.append((axis, None, None))
+                continue
+            # tách được theo chiều nào?
+            sep = (max(ok_v) < min(bad_v)) if lo_is_ok else (min(ok_v) > max(bad_v))
+            bound = (max(ok_v), min(bad_v)) if lo_is_ok else (max(bad_v), min(ok_v))
+            verdicts.append((axis, sep, bound))
+        line = "  %-9s" % impl_key
+        for axis, sep, bound in verdicts:
+            name = "số mảnh" if axis == "frags_est" else "MTU"
+            if sep is None:
+                line += "  %s: (không đủ hai phía)" % name
+            elif sep:
+                line += "  %s: ✅ TÁCH ĐƯỢC, ranh giới %d|%d" % (name, bound[0], bound[1])
+            else:
+                line += "  %s: ⛔ chồng lấn" % name
+        print(line)
+
+    print()
+    print("  ═══ NGƯỠNG THEO TỪNG CÀI ĐẶT (chỉ đúng nếu trục số mảnh TÁCH ĐƯỢC) ═══")
     thresholds = {}
     for impl_key, impl_ver, _ in IMPLS:
         rs = [r for r in results if r["impl"] == impl_key]

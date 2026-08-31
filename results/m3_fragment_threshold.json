@@ -3,18 +3,13 @@
     {
       "key": "gnutls",
       "version": "gnutls-serv 3.8.13"
-    },
-    {
-      "key": "openssl",
-      "version": "LibreSSL 3.3.6"
     }
   ],
   "thresholds": {
     "gnutls": {
       "max_ok_frags": 22,
-      "min_fail_frags": 19
-    },
-    "openssl": null
+      "min_fail_frags": 28
+    }
   },
   "rows": [
     {
@@ -26,7 +21,7 @@
       "frags_est": 10,
       "handshake_ok": true,
       "timed_out": false,
-      "seconds": 6.44
+      "seconds": 6.45
     },
     {
       "impl": "gnutls",
@@ -37,7 +32,7 @@
       "frags_est": 7,
       "handshake_ok": true,
       "timed_out": false,
-      "seconds": 3.69
+      "seconds": 3.71
     },
     {
       "impl": "gnutls",
@@ -48,7 +43,7 @@
       "frags_est": 5,
       "handshake_ok": true,
       "timed_out": false,
-      "seconds": 3.25
+      "seconds": 3.27
     },
     {
       "impl": "gnutls",
@@ -95,83 +90,6 @@
       "seconds": 2.62
     },
     {
-      "impl": "openssl",
-      "impl_version": "LibreSSL 3.3.6",
-      "key_bits": 2048,
-      "cert_bytes": 956,
-      "mtu": 102,
-      "frags_est": 10,
-      "handshake_ok": false,
-      "timed_out": false,
-      "seconds": 0.0
-    },
-    {
-      "impl": "openssl",
-      "impl_version": "LibreSSL 3.3.6",
-      "key_bits": 2048,
-      "cert_bytes": 956,
-      "mtu": 150,
-      "frags_est": 7,
-      "handshake_ok": false,
-      "timed_out": false,
-      "seconds": 0.0
-    },
-    {
-      "impl": "openssl",
-      "impl_version": "LibreSSL 3.3.6",
-      "key_bits": 2048,
-      "cert_bytes": 956,
-      "mtu": 200,
-      "frags_est": 5,
-      "handshake_ok": false,
-      "timed_out": false,
-      "seconds": 0.01
-    },
-    {
-      "impl": "openssl",
-      "impl_version": "LibreSSL 3.3.6",
-      "key_bits": 2048,
-      "cert_bytes": 956,
-      "mtu": 250,
-      "frags_est": 4,
-      "handshake_ok": false,
-      "timed_out": false,
-      "seconds": 0.0
-    },
-    {
-      "impl": "openssl",
-      "impl_version": "LibreSSL 3.3.6",
-      "key_bits": 2048,
-      "cert_bytes": 956,
-      "mtu": 300,
-      "frags_est": 4,
-      "handshake_ok": false,
-      "timed_out": true,
-      "seconds": 25.0
-    },
-    {
-      "impl": "openssl",
-      "impl_version": "LibreSSL 3.3.6",
-      "key_bits": 2048,
-      "cert_bytes": 956,
-      "mtu": 400,
-      "frags_est": 3,
-      "handshake_ok": false,
-      "timed_out": true,
-      "seconds": 25.0
-    },
-    {
-      "impl": "openssl",
-      "impl_version": "LibreSSL 3.3.6",
-      "key_bits": 2048,
-      "cert_bytes": 956,
-      "mtu": 600,
-      "frags_est": 2,
-      "handshake_ok": false,
-      "timed_out": true,
-      "seconds": 25.0
-    },
-    {
       "impl": "gnutls",
       "impl_version": "gnutls-serv 3.8.13",
       "key_bits": 8192,
@@ -191,7 +109,7 @@
       "frags_est": 21,
       "handshake_ok": true,
       "timed_out": false,
-      "seconds": 8.81
+      "seconds": 8.82
     },
     {
       "impl": "gnutls",
@@ -202,7 +120,7 @@
       "frags_est": 16,
       "handshake_ok": true,
       "timed_out": false,
-      "seconds": 7.22
+      "seconds": 7.2
     },
     {
       "impl": "gnutls",
@@ -213,7 +131,7 @@
       "frags_est": 13,
       "handshake_ok": true,
       "timed_out": false,
-      "seconds": 5.9
+      "seconds": 5.88
     },
     {
       "impl": "gnutls",
@@ -224,7 +142,7 @@
       "frags_est": 11,
       "handshake_ok": true,
       "timed_out": false,
-      "seconds": 5.47
+      "seconds": 5.46
     },
     {
       "impl": "gnutls",
@@ -235,7 +153,7 @@
       "frags_est": 8,
       "handshake_ok": true,
       "timed_out": false,
-      "seconds": 3.43
+      "seconds": 3.41
     },
     {
       "impl": "gnutls",
@@ -246,84 +164,7 @@
       "frags_est": 6,
       "handshake_ok": true,
       "timed_out": false,
-      "seconds": 3.0
-    },
-    {
-      "impl": "openssl",
-      "impl_version": "LibreSSL 3.3.6",
-      "key_bits": 8192,
-      "cert_bytes": 3036,
-      "mtu": 102,
-      "frags_est": 30,
-      "handshake_ok": false,
-      "timed_out": false,
-      "seconds": 0.0
-    },
-    {
-      "impl": "openssl",
-      "impl_version": "LibreSSL 3.3.6",
-      "key_bits": 8192,
-      "cert_bytes": 3036,
-      "mtu": 150,
-      "frags_est": 21,
-      "handshake_ok": false,
-      "timed_out": false,
-      "seconds": 0.01
-    },
-    {
-      "impl": "openssl",
-      "impl_version": "LibreSSL 3.3.6",
-      "key_bits": 8192,
-      "cert_bytes": 3036,
-      "mtu": 200,
-      "frags_est": 16,
-      "handshake_ok": false,
-      "timed_out": false,
-      "seconds": 0.0
-    },
-    {
-      "impl": "openssl",
-      "impl_version": "LibreSSL 3.3.6",
-      "key_bits": 8192,
-      "cert_bytes": 3036,
-      "mtu": 250,
-      "frags_est": 13,
-      "handshake_ok": false,
-      "timed_out": false,
-      "seconds": 0.0
-    },
-    {
-      "impl": "openssl",
-      "impl_version": "LibreSSL 3.3.6",
-      "key_bits": 8192,
-      "cert_bytes": 3036,
-      "mtu": 300,
-      "frags_est": 11,
-      "handshake_ok": false,
-      "timed_out": true,
-      "seconds": 25.0
-    },
-    {
-      "impl": "openssl",
-      "impl_version": "LibreSSL 3.3.6",
-      "key_bits": 8192,
-      "cert_bytes": 3036,
-      "mtu": 400,
-      "frags_est": 8,
-      "handshake_ok": false,
-      "timed_out": true,
-      "seconds": 25.0
-    },
-    {
-      "impl": "openssl",
-      "impl_version": "LibreSSL 3.3.6",
-      "key_bits": 8192,
-      "cert_bytes": 3036,
-      "mtu": 600,
-      "frags_est": 6,
-      "handshake_ok": false,
-      "timed_out": true,
-      "seconds": 25.0
+      "seconds": 2.99
     },
     {
       "impl": "gnutls",
@@ -367,7 +208,7 @@
       "frags_est": 22,
       "handshake_ok": true,
       "timed_out": false,
-      "seconds": 9.06
+      "seconds": 8.65
     },
     {
       "impl": "gnutls",
@@ -376,9 +217,9 @@
       "cert_bytes": 5462,
       "mtu": 300,
       "frags_est": 19,
-      "handshake_ok": false,
+      "handshake_ok": true,
       "timed_out": false,
-      "seconds": 283.0
+      "seconds": 7.8
     },
     {
       "impl": "gnutls",
@@ -389,7 +230,7 @@
       "frags_est": 14,
       "handshake_ok": true,
       "timed_out": false,
-      "seconds": 6.49
+      "seconds": 6.5
     },
     {
       "impl": "gnutls",
@@ -400,84 +241,7 @@
       "frags_est": 10,
       "handshake_ok": true,
       "timed_out": false,
-      "seconds": 5.09
-    },
-    {
-      "impl": "openssl",
-      "impl_version": "LibreSSL 3.3.6",
-      "key_bits": 15360,
-      "cert_bytes": 5462,
-      "mtu": 102,
-      "frags_est": 54,
-      "handshake_ok": false,
-      "timed_out": false,
-      "seconds": 0.0
-    },
-    {
-      "impl": "openssl",
-      "impl_version": "LibreSSL 3.3.6",
-      "key_bits": 15360,
-      "cert_bytes": 5462,
-      "mtu": 150,
-      "frags_est": 37,
-      "handshake_ok": false,
-      "timed_out": false,
-      "seconds": 0.01
-    },
-    {
-      "impl": "openssl",
-      "impl_version": "LibreSSL 3.3.6",
-      "key_bits": 15360,
-      "cert_bytes": 5462,
-      "mtu": 200,
-      "frags_est": 28,
-      "handshake_ok": false,
-      "timed_out": false,
-      "seconds": 0.0
-    },
-    {
-      "impl": "openssl",
-      "impl_version": "LibreSSL 3.3.6",
-      "key_bits": 15360,
-      "cert_bytes": 5462,
-      "mtu": 250,
-      "frags_est": 22,
-      "handshake_ok": false,
-      "timed_out": false,
-      "seconds": 0.0
-    },
-    {
-      "impl": "openssl",
-      "impl_version": "LibreSSL 3.3.6",
-      "key_bits": 15360,
-      "cert_bytes": 5462,
-      "mtu": 300,
-      "frags_est": 19,
-      "handshake_ok": false,
-      "timed_out": true,
-      "seconds": 25.0
-    },
-    {
-      "impl": "openssl",
-      "impl_version": "LibreSSL 3.3.6",
-      "key_bits": 15360,
-      "cert_bytes": 5462,
-      "mtu": 400,
-      "frags_est": 14,
-      "handshake_ok": false,
-      "timed_out": true,
-      "seconds": 25.0
-    },
-    {
-      "impl": "openssl",
-      "impl_version": "LibreSSL 3.3.6",
-      "key_bits": 15360,
-      "cert_bytes": 5462,
-      "mtu": 600,
-      "frags_est": 10,
-      "handshake_ok": false,
-      "timed_out": true,
-      "seconds": 25.0
+      "seconds": 5.1
     }
   ]
 }

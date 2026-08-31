@@ -1,0 +1,486 @@
+{
+  "implementations": [
+    {
+      "key": "gnutls",
+      "version": "gnutls-serv 3.8.13"
+    },
+    {
+      "key": "openssl",
+      "version": "OpenSSL 3.6.4 25 Aug 2026 (Library: OpenSSL 3.6.4 25 Aug 2026)"
+    }
+  ],
+  "thresholds": {
+    "gnutls": {
+      "max_ok_frags": 23,
+      "min_fail_frags": 28
+    },
+    "openssl": {
+      "max_ok_frags": 19,
+      "min_fail_frags": 5
+    }
+  },
+  "rows": [
+    {
+      "impl": "gnutls",
+      "impl_version": "gnutls-serv 3.8.13",
+      "key_bits": 2048,
+      "cert_bytes": 1090,
+      "mtu": 102,
+      "frags_est": 11,
+      "handshake_ok": true,
+      "timed_out": false,
+      "seconds": 6.54
+    },
+    {
+      "impl": "gnutls",
+      "impl_version": "gnutls-serv 3.8.13",
+      "key_bits": 2048,
+      "cert_bytes": 1090,
+      "mtu": 150,
+      "frags_est": 8,
+      "handshake_ok": true,
+      "timed_out": false,
+      "seconds": 4.88
+    },
+    {
+      "impl": "gnutls",
+      "impl_version": "gnutls-serv 3.8.13",
+      "key_bits": 2048,
+      "cert_bytes": 1090,
+      "mtu": 200,
+      "frags_est": 6,
+      "handshake_ok": true,
+      "timed_out": false,
+      "seconds": 3.28
+    },
+    {
+      "impl": "gnutls",
+      "impl_version": "gnutls-serv 3.8.13",
+      "key_bits": 2048,
+      "cert_bytes": 1090,
+      "mtu": 250,
+      "frags_est": 5,
+      "handshake_ok": true,
+      "timed_out": false,
+      "seconds": 2.97
+    },
+    {
+      "impl": "gnutls",
+      "impl_version": "gnutls-serv 3.8.13",
+      "key_bits": 2048,
+      "cert_bytes": 1090,
+      "mtu": 300,
+      "frags_est": 4,
+      "handshake_ok": true,
+      "timed_out": false,
+      "seconds": 2.87
+    },
+    {
+      "impl": "gnutls",
+      "impl_version": "gnutls-serv 3.8.13",
+      "key_bits": 2048,
+      "cert_bytes": 1090,
+      "mtu": 400,
+      "frags_est": 3,
+      "handshake_ok": true,
+      "timed_out": false,
+      "seconds": 2.77
+    },
+    {
+      "impl": "gnutls",
+      "impl_version": "gnutls-serv 3.8.13",
+      "key_bits": 2048,
+      "cert_bytes": 1090,
+      "mtu": 600,
+      "frags_est": 2,
+      "handshake_ok": true,
+      "timed_out": false,
+      "seconds": 2.57
+    },
+    {
+      "impl": "openssl",
+      "impl_version": "OpenSSL 3.6.4 25 Aug 2026 (Library: OpenSSL 3.6.4 25 Aug 2026)",
+      "key_bits": 2048,
+      "cert_bytes": 1090,
+      "mtu": 102,
+      "frags_est": 11,
+      "handshake_ok": false,
+      "timed_out": false,
+      "seconds": 0.03
+    },
+    {
+      "impl": "openssl",
+      "impl_version": "OpenSSL 3.6.4 25 Aug 2026 (Library: OpenSSL 3.6.4 25 Aug 2026)",
+      "key_bits": 2048,
+      "cert_bytes": 1090,
+      "mtu": 150,
+      "frags_est": 8,
+      "handshake_ok": false,
+      "timed_out": false,
+      "seconds": 0.03
+    },
+    {
+      "impl": "openssl",
+      "impl_version": "OpenSSL 3.6.4 25 Aug 2026 (Library: OpenSSL 3.6.4 25 Aug 2026)",
+      "key_bits": 2048,
+      "cert_bytes": 1090,
+      "mtu": 200,
+      "frags_est": 6,
+      "handshake_ok": false,
+      "timed_out": false,
+      "seconds": 0.03
+    },
+    {
+      "impl": "openssl",
+      "impl_version": "OpenSSL 3.6.4 25 Aug 2026 (Library: OpenSSL 3.6.4 25 Aug 2026)",
+      "key_bits": 2048,
+      "cert_bytes": 1090,
+      "mtu": 250,
+      "frags_est": 5,
+      "handshake_ok": false,
+      "timed_out": false,
+      "seconds": 0.03
+    },
+    {
+      "impl": "openssl",
+      "impl_version": "OpenSSL 3.6.4 25 Aug 2026 (Library: OpenSSL 3.6.4 25 Aug 2026)",
+      "key_bits": 2048,
+      "cert_bytes": 1090,
+      "mtu": 300,
+      "frags_est": 4,
+      "handshake_ok": true,
+      "timed_out": false,
+      "seconds": 0.04
+    },
+    {
+      "impl": "openssl",
+      "impl_version": "OpenSSL 3.6.4 25 Aug 2026 (Library: OpenSSL 3.6.4 25 Aug 2026)",
+      "key_bits": 2048,
+      "cert_bytes": 1090,
+      "mtu": 400,
+      "frags_est": 3,
+      "handshake_ok": true,
+      "timed_out": false,
+      "seconds": 0.03
+    },
+    {
+      "impl": "openssl",
+      "impl_version": "OpenSSL 3.6.4 25 Aug 2026 (Library: OpenSSL 3.6.4 25 Aug 2026)",
+      "key_bits": 2048,
+      "cert_bytes": 1090,
+      "mtu": 600,
+      "frags_est": 2,
+      "handshake_ok": true,
+      "timed_out": false,
+      "seconds": 0.04
+    },
+    {
+      "impl": "gnutls",
+      "impl_version": "gnutls-serv 3.8.13",
+      "key_bits": 8192,
+      "cert_bytes": 3170,
+      "mtu": 102,
+      "frags_est": 32,
+      "handshake_ok": false,
+      "timed_out": true,
+      "seconds": 25.03
+    },
+    {
+      "impl": "gnutls",
+      "impl_version": "gnutls-serv 3.8.13",
+      "key_bits": 8192,
+      "cert_bytes": 3170,
+      "mtu": 150,
+      "frags_est": 22,
+      "handshake_ok": true,
+      "timed_out": false,
+      "seconds": 8.58
+    },
+    {
+      "impl": "gnutls",
+      "impl_version": "gnutls-serv 3.8.13",
+      "key_bits": 8192,
+      "cert_bytes": 3170,
+      "mtu": 200,
+      "frags_est": 16,
+      "handshake_ok": true,
+      "timed_out": false,
+      "seconds": 7.07
+    },
+    {
+      "impl": "gnutls",
+      "impl_version": "gnutls-serv 3.8.13",
+      "key_bits": 8192,
+      "cert_bytes": 3170,
+      "mtu": 250,
+      "frags_est": 13,
+      "handshake_ok": true,
+      "timed_out": false,
+      "seconds": 5.87
+    },
+    {
+      "impl": "gnutls",
+      "impl_version": "gnutls-serv 3.8.13",
+      "key_bits": 8192,
+      "cert_bytes": 3170,
+      "mtu": 300,
+      "frags_est": 11,
+      "handshake_ok": true,
+      "timed_out": false,
+      "seconds": 5.26
+    },
+    {
+      "impl": "gnutls",
+      "impl_version": "gnutls-serv 3.8.13",
+      "key_bits": 8192,
+      "cert_bytes": 3170,
+      "mtu": 400,
+      "frags_est": 8,
+      "handshake_ok": true,
+      "timed_out": false,
+      "seconds": 4.66
+    },
+    {
+      "impl": "gnutls",
+      "impl_version": "gnutls-serv 3.8.13",
+      "key_bits": 8192,
+      "cert_bytes": 3170,
+      "mtu": 600,
+      "frags_est": 6,
+      "handshake_ok": true,
+      "timed_out": false,
+      "seconds": 3.06
+    },
+    {
+      "impl": "openssl",
+      "impl_version": "OpenSSL 3.6.4 25 Aug 2026 (Library: OpenSSL 3.6.4 25 Aug 2026)",
+      "key_bits": 8192,
+      "cert_bytes": 3170,
+      "mtu": 102,
+      "frags_est": 32,
+      "handshake_ok": false,
+      "timed_out": false,
+      "seconds": 0.03
+    },
+    {
+      "impl": "openssl",
+      "impl_version": "OpenSSL 3.6.4 25 Aug 2026 (Library: OpenSSL 3.6.4 25 Aug 2026)",
+      "key_bits": 8192,
+      "cert_bytes": 3170,
+      "mtu": 150,
+      "frags_est": 22,
+      "handshake_ok": false,
+      "timed_out": false,
+      "seconds": 0.03
+    },
+    {
+      "impl": "openssl",
+      "impl_version": "OpenSSL 3.6.4 25 Aug 2026 (Library: OpenSSL 3.6.4 25 Aug 2026)",
+      "key_bits": 8192,
+      "cert_bytes": 3170,
+      "mtu": 200,
+      "frags_est": 16,
+      "handshake_ok": false,
+      "timed_out": false,
+      "seconds": 0.03
+    },
+    {
+      "impl": "openssl",
+      "impl_version": "OpenSSL 3.6.4 25 Aug 2026 (Library: OpenSSL 3.6.4 25 Aug 2026)",
+      "key_bits": 8192,
+      "cert_bytes": 3170,
+      "mtu": 250,
+      "frags_est": 13,
+      "handshake_ok": false,
+      "timed_out": false,
+      "seconds": 0.03
+    },
+    {
+      "impl": "openssl",
+      "impl_version": "OpenSSL 3.6.4 25 Aug 2026 (Library: OpenSSL 3.6.4 25 Aug 2026)",
+      "key_bits": 8192,
+      "cert_bytes": 3170,
+      "mtu": 300,
+      "frags_est": 11,
+      "handshake_ok": true,
+      "timed_out": false,
+      "seconds": 0.09
+    },
+    {
+      "impl": "openssl",
+      "impl_version": "OpenSSL 3.6.4 25 Aug 2026 (Library: OpenSSL 3.6.4 25 Aug 2026)",
+      "key_bits": 8192,
+      "cert_bytes": 3170,
+      "mtu": 400,
+      "frags_est": 8,
+      "handshake_ok": true,
+      "timed_out": false,
+      "seconds": 0.09
+    },
+    {
+      "impl": "openssl",
+      "impl_version": "OpenSSL 3.6.4 25 Aug 2026 (Library: OpenSSL 3.6.4 25 Aug 2026)",
+      "key_bits": 8192,
+      "cert_bytes": 3170,
+      "mtu": 600,
+      "frags_est": 6,
+      "handshake_ok": true,
+      "timed_out": false,
+      "seconds": 0.08
+    },
+    {
+      "impl": "gnutls",
+      "impl_version": "gnutls-serv 3.8.13",
+      "key_bits": 15360,
+      "cert_bytes": 5600,
+      "mtu": 102,
+      "frags_est": 55,
+      "handshake_ok": false,
+      "timed_out": true,
+      "seconds": 25.03
+    },
+    {
+      "impl": "gnutls",
+      "impl_version": "gnutls-serv 3.8.13",
+      "key_bits": 15360,
+      "cert_bytes": 5600,
+      "mtu": 150,
+      "frags_est": 38,
+      "handshake_ok": false,
+      "timed_out": true,
+      "seconds": 25.03
+    },
+    {
+      "impl": "gnutls",
+      "impl_version": "gnutls-serv 3.8.13",
+      "key_bits": 15360,
+      "cert_bytes": 5600,
+      "mtu": 200,
+      "frags_est": 28,
+      "handshake_ok": false,
+      "timed_out": true,
+      "seconds": 25.03
+    },
+    {
+      "impl": "gnutls",
+      "impl_version": "gnutls-serv 3.8.13",
+      "key_bits": 15360,
+      "cert_bytes": 5600,
+      "mtu": 250,
+      "frags_est": 23,
+      "handshake_ok": true,
+      "timed_out": false,
+      "seconds": 8.6
+    },
+    {
+      "impl": "gnutls",
+      "impl_version": "gnutls-serv 3.8.13",
+      "key_bits": 15360,
+      "cert_bytes": 5600,
+      "mtu": 300,
+      "frags_est": 19,
+      "handshake_ok": true,
+      "timed_out": false,
+      "seconds": 7.6
+    },
+    {
+      "impl": "gnutls",
+      "impl_version": "gnutls-serv 3.8.13",
+      "key_bits": 15360,
+      "cert_bytes": 5600,
+      "mtu": 400,
+      "frags_est": 14,
+      "handshake_ok": true,
+      "timed_out": false,
+      "seconds": 6.39
+    },
+    {
+      "impl": "gnutls",
+      "impl_version": "gnutls-serv 3.8.13",
+      "key_bits": 15360,
+      "cert_bytes": 5600,
+      "mtu": 600,
+      "frags_est": 10,
+      "handshake_ok": true,
+      "timed_out": false,
+      "seconds": 5.29
+    },
+    {
+      "impl": "openssl",
+      "impl_version": "OpenSSL 3.6.4 25 Aug 2026 (Library: OpenSSL 3.6.4 25 Aug 2026)",
+      "key_bits": 15360,
+      "cert_bytes": 5600,
+      "mtu": 102,
+      "frags_est": 55,
+      "handshake_ok": false,
+      "timed_out": false,
+      "seconds": 0.03
+    },
+    {
+      "impl": "openssl",
+      "impl_version": "OpenSSL 3.6.4 25 Aug 2026 (Library: OpenSSL 3.6.4 25 Aug 2026)",
+      "key_bits": 15360,
+      "cert_bytes": 5600,
+      "mtu": 150,
+      "frags_est": 38,
+      "handshake_ok": false,
+      "timed_out": false,
+      "seconds": 0.03
+    },
+    {
+      "impl": "openssl",
+      "impl_version": "OpenSSL 3.6.4 25 Aug 2026 (Library: OpenSSL 3.6.4 25 Aug 2026)",
+      "key_bits": 15360,
+      "cert_bytes": 5600,
+      "mtu": 200,
+      "frags_est": 28,
+      "handshake_ok": false,
+      "timed_out": false,
+      "seconds": 0.03
+    },
+    {
+      "impl": "openssl",
+      "impl_version": "OpenSSL 3.6.4 25 Aug 2026 (Library: OpenSSL 3.6.4 25 Aug 2026)",
+      "key_bits": 15360,
+      "cert_bytes": 5600,
+      "mtu": 250,
+      "frags_est": 23,
+      "handshake_ok": false,
+      "timed_out": false,
+      "seconds": 0.03
+    },
+    {
+      "impl": "openssl",
+      "impl_version": "OpenSSL 3.6.4 25 Aug 2026 (Library: OpenSSL 3.6.4 25 Aug 2026)",
+      "key_bits": 15360,
+      "cert_bytes": 5600,
+      "mtu": 300,
+      "frags_est": 19,
+      "handshake_ok": true,
+      "timed_out": false,
+      "seconds": 0.25
+    },
+    {
+      "impl": "openssl",
+      "impl_version": "OpenSSL 3.6.4 25 Aug 2026 (Library: OpenSSL 3.6.4 25 Aug 2026)",
+      "key_bits": 15360,
+      "cert_bytes": 5600,
+      "mtu": 400,
+      "frags_est": 14,
+      "handshake_ok": true,
+      "timed_out": false,
+      "seconds": 0.23
+    },
+    {
+      "impl": "openssl",
+      "impl_version": "OpenSSL 3.6.4 25 Aug 2026 (Library: OpenSSL 3.6.4 25 Aug 2026)",
+      "key_bits": 15360,
+      "cert_bytes": 5600,
+      "mtu": 600,
+      "frags_est": 10,
+      "handshake_ok": true,
+      "timed_out": false,
+      "seconds": 0.25
+    }
+  ]
+}
