@@ -309,11 +309,31 @@ def main():
             print("  %-9s xong tới %d mảnh · hỏng từ %d mảnh" % (impl_key, hi_ok, lo_bad))
 
     # --- tách giả thuyết (b) hết giờ khỏi (c) giới hạn số mảnh ---
+    # ⚠ Phép so thời gian này CHỈ có nghĩa khi ranh giới nằm trên trục SỐ MẢNH. Nếu ranh giới
+    # nằm trên trục MTU (như OpenSSL) thì cả (b) lẫn (c) đều không phải giả thuyết đúng, và in
+    # ra một trong hai là sai. Bản trước in "nghiêng về giới hạn số mảnh" cho một cài đặt mà
+    # trục số mảnh CHỒNG LẤN. Cùng lớp lỗi với phần tổng kết ngưỡng: kết luận trên một trục
+    # chưa kiểm là trục đúng.
     print()
-    print("  ═══ TÁCH GIẢ THUYẾT: hết giờ (b) hay giới hạn số mảnh (c)? ═══")
+    frag_separates = any(
+        (lambda ok, bad: bool(ok) and bool(bad) and max(ok) < min(bad))(
+            [r["frags_est"] for r in results if r["impl"] == k and r["handshake_ok"]],
+            [r["frags_est"] for r in results if r["impl"] == k and not r["handshake_ok"]])
+        for k, _, _ in IMPLS)
+    if not frag_separates:
+        print("  ═══ TÁCH GIẢ THUYẾT: BỎ QUA ═══")
+        print("  Không cài đặt nào có ranh giới nằm trên trục SỐ MẢNH, nên câu hỏi 'hết giờ")
+        print("  hay giới hạn số mảnh' không áp dụng. Xem lại phần trục ở trên.")
+        print()
+        _skip_hypothesis = True
+    else:
+        _skip_hypothesis = False
+        print("  ═══ TÁCH GIẢ THUYẾT: hết giờ (b) hay giới hạn số mảnh (c)? ═══")
     fails = [r for r in results if not r["handshake_ok"] and r["seconds"] > 0]
     oks = [r for r in results if r["handshake_ok"]]
-    if fails and oks:
+    if _skip_hypothesis:
+        pass
+    elif fails and oks:
         mf = sum(r["seconds"] for r in fails) / len(fails)
         mo = sum(r["seconds"] for r in oks) / len(oks)
         print("  thời gian trung bình: ca hỏng %.2f s · ca xong %.2f s (gấp %.1f lần)"
