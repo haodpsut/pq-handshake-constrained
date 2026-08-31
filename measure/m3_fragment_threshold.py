@@ -180,10 +180,45 @@ def openssl_handshake_ok(out):
     return read_bytes > 0 and named
 
 
+
+def probe_mbedtls(crt, key, mtu, port):
+    """mbedTLS ssl_server2 / ssl_client2.
+
+    ⭐ VÌ SAO CÀI ĐẶT NÀY QUAN TRỌNG NHẤT trong ba cái: OpenSSL và GnuTLS **không chạy trên
+    thiết bị ràng buộc**. mbedTLS thì có (Zephyr, mbed OS), cùng với tinydtls (Contiki-NG).
+    Nên đây là cài đặt DUY NHẤT trong bộ này thật sự được triển khai trên đúng loại phần cứng
+    mà bài nói tới. Hai cái kia là đối chứng phía máy chủ.
+
+    Bằng chứng thành công: ssl_client2 in "Protocol is DTLSv1.2" và "Ciphersuite is TLS-...".
+    """
+    srv = subprocess.Popen(
+        [MBEDTLS_SERVER, "dtls=1", "server_port=%d" % port, "mtu=%d" % mtu,
+         "crt_file=%s" % crt, "key_file=%s" % key, "server_addr=127.0.0.1"],
+        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, stdin=subprocess.DEVNULL)
+    time.sleep(1.0)
+    out, timed_out, dt = run_proc(
+        [MBEDTLS_CLIENT, "dtls=1", "server_port=%d" % port, "mtu=%d" % mtu,
+         "server_addr=127.0.0.1", "auth_mode=none", "max_frag_len=0"],
+        stdin_bytes=b"", timeout=PROBE_TIMEOUT)
+    srv.terminate()
+    try:
+        srv.wait(timeout=5)
+    except subprocess.TimeoutExpired:
+        srv.kill()
+    ok = bool(re.search(r"Ciphersuite is TLS-\S+", out))
+    return ok, timed_out, dt
+
+MBEDTLS_SERVER = os.path.expanduser(
+    os.environ.get("MBEDTLS_SERVER", "~/mbedtls-src/programs/ssl/ssl_server2"))
+MBEDTLS_CLIENT = os.path.expanduser(
+    os.environ.get("MBEDTLS_CLIENT", "~/mbedtls-src/programs/ssl/ssl_client2"))
+
 IMPLS = []
 if shutil.which("gnutls-serv"):
     v = sh("gnutls-serv --version 2>&1 | head -1")
     IMPLS.append(("gnutls", (v.stdout or "").strip() if v else "gnutls", probe_gnutls))
+if os.path.exists(MBEDTLS_SERVER) and os.path.exists(MBEDTLS_CLIENT):
+    IMPLS.append(("mbedtls", "mbedtls ssl_server2/ssl_client2", probe_mbedtls))
 if shutil.which("openssl"):
     v = sh("openssl version")
     name = (v.stdout or "").strip() if v else "openssl"
