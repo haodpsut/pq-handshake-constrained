@@ -253,27 +253,42 @@ def main():
     # ĐÃ BIẾT ĐÚNG, TRƯỚC KHI QUÉT. Nếu ca đó trượt thì dữ liệu không tồn tại, và im lặng bỏ
     # qua là cách sinh ra bảng đẹp mà rỗng.
     # ══════════════════════════════════════════════════════════════════════════════════
-    made = make_cert(min(KEY_BITS))
-    if made is None:
-        print("  ⛔ khong sinh duoc chung thu de chay chung duong tinh"); return 1
-    ck, cc, _ = made
-    print("  ═══ CHỨNG DƯƠNG TÍNH (chứng thư nhỏ nhất, MTU 1400) ═══")
-    usable = []
-    port_ctl = PORT_BASE - 100
-    for impl_key, impl_ver, probe in IMPLS:
-        port_ctl += 1
-        ok, timed_out, dt = probe(cc, ck, 1400, port_ctl)
-        print("    %-8s %s  (%.2f s)"
-              % (impl_key, "✅ bắt tay được ⇒ DÙNG ĐƯỢC"
-                 if ok else "⛔ KHÔNG bắt tay nổi ⇒ LOẠI, mọi số của nó sẽ vô nghĩa", dt))
-        if ok:
-            usable.append((impl_key, impl_ver, probe))
+    # Chứng dương tính chạy cho TỪNG CẶP (cài đặt, chứng thư), không phải một lần cho cả
+    # phiên. Lý do: mbedTLS nạp được RSA-2048 và RSA-8192 nhưng KHÔNG nạp nổi RSA-15360
+    # (`mbedtls_x509_crt_parse_file` trả -0x3b00, vượt MBEDTLS_MPI_MAX_SIZE). Bảy ô của nó
+    # hiện ra là "hỏng ở mọi MTU", trông y hệt một phát hiện về đường truyền, trong khi thật
+    # ra thư viện chưa bao giờ đọc được cái khoá.
+    #
+    # Đây là lần thứ BA cùng một nhu cầu: PHÂN BIỆT "công cụ không nhận đầu vào" với "kết quả
+    # âm". Nên lần này làm cho nó tổng quát thay vì vá từng ca.
+    print("  ═══ CHỨNG DƯƠNG TÍNH THEO TỪNG CẶP (cài đặt × chứng thư), MTU 1400 ═══")
+    print("  Cặp nào không bắt tay nổi ở MTU RỘNG thì bị LOẠI khỏi quét: mọi ô của nó sẽ")
+    print("  phản ánh giới hạn của thư viện chứ không phải của đường truyền.\n")
+    allowed = {}
+    port_ctl = PORT_BASE - 200
+    for key_bits in KEY_BITS:
+        made = make_cert(key_bits)
+        if made is None:
+            continue
+        ck, cc, _ = made
+        for impl_key, impl_ver, probe in IMPLS:
+            port_ctl += 1
+            try:
+                ok, _, dt = probe(cc, ck, 1400, port_ctl)
+            except RuntimeError as e:                            # noqa: BLE001
+                print("    %-8s RSA-%-6d ⛔ LỖI GỌI: %s" % (impl_key, key_bits, e))
+                ok, dt = False, 0.0
+            allowed[(impl_key, key_bits)] = ok
+            print("    %-8s RSA-%-6d %s  (%.2f s)"
+                  % (impl_key, key_bits,
+                     "✅ dùng được" if ok else "⛔ LOẠI, thư viện không xử lý được cặp này", dt))
     print()
-    if not usable:
-        print("  ⛔ KHÔNG cài đặt nào qua chứng dương tính. DỪNG, không sinh dữ liệu.")
+    usable_impls = sorted({k for (k, _), v in allowed.items() if v})
+    if not usable_impls:
+        print("  ⛔ KHÔNG cặp nào qua chứng dương tính. DỪNG, không sinh dữ liệu.")
         print("     Sửa môi trường trước. Quét tiếp chỉ tạo ra bảng rỗng trông như dữ liệu.")
         return 2
-    IMPLS[:] = usable
+    IMPLS[:] = [t for t in IMPLS if t[0] in usable_impls]
 
     results = []
     port = PORT_BASE
@@ -286,6 +301,9 @@ def main():
         print("  %-9s %6s %7s %10s %9s" % ("cài đặt", "MTU", "~mảnh", "kết quả", "giây"))
         print("  " + "-" * 50)
         for impl_key, impl_ver, probe in IMPLS:
+            if not allowed.get((impl_key, key_bits), False):
+                print("  %-9s %s" % (impl_key, "(bỏ qua: không qua chứng dương tính ở cặp này)"))
+                continue
             for mtu in MTUS:
                 port += 1
                 frags = -(-csize // mtu)
