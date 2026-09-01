@@ -8,6 +8,23 @@ Everything here runs on a laptop. **No quantum hardware, no GPU, and no PQC libr
 needed**: the argument is about message *size*, so the experiments pad payloads and
 certificates to post-quantum sizes rather than computing real post-quantum primitives.
 
+## Where this sits
+
+Two papers bound the question, and this package works in the gap between them.
+
+**Fedrecheski, Vučinić and Watteyne** (WCNC 2024) measured EDHOC against DTLS 1.3 on
+constrained hardware over an IEEE 802.15.4 radio, and reported a x6 to x14 reduction in packet
+size but only a x1.44 improvement in handshake duration. The size advantage already failed to
+translate proportionally, with classical credentials.
+
+**Fraile et al.** (IEEE Access 2025) built post-quantum EDHOC and measured it on an nRF52840
+with energy and memory, over 6LoWPAN on BLE, sweeping CoAP block sizes. They establish that
+post-quantum EDHOC runs.
+
+Neither asks whether the advantage Fedrecheski measured survives the credentials Fraile
+implemented, neither counts round trips, and neither compares DTLS implementations against
+each other. That is what is here.
+
 ## The question
 
 RFC 9668 §1 states, of the EDHOC-over-CoAP optimisation:

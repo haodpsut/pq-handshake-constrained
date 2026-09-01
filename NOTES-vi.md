@@ -1,130 +1,117 @@
-# Đề cương P3 cho Computer Communications (Elsevier, hybrid, nộp thường miễn phí)
+# Đề cương P3, BẢN 2 (01/09/2026) — viết lại sau occupied-check lần hai
 
-Trạng thái 29/08/2026. Bốn spike đã chạy, ba phép kiểm đã bác hoặc sửa chính lập luận của
-tôi. Đây là đề cương, KHÔNG phải bản thảo.
+⚠ **Bản 1 đã bỏ.** Nó dựng bài trên bốn trục, và occupied-check lần hai giết mất hai.
+Lý do và bằng chứng ở sổ: `reference-pq-edhoc-fraile-da-chiem`.
 
 ---
 
-## 0. Một câu
+## 0. Chỗ đứng, một bảng
 
-Chuẩn EDHOC-trên-CoAP tự khai lợi thế hai vòng của nó **"có thể mất"** khi gặp block-wise, và
-treo lợi thế đó vào điều kiện bản tin đủ nhỏ để lọt MTU. Hậu lượng tử phá đúng điều kiện ấy ở
-**mọi** bộ tham số NIST, và không có cấu hình nào chỉnh lại được.
+| | Fedrecheski, WCNC 2024 | Fraile et al., IEEE Access 2025 | **bài này** |
+|---|---|---|---|
+| so EDHOC với DTLS | ✅ | ❌ | ✅ |
+| chứng thư hậu lượng tử | ❌ cổ điển | ✅ | ✅ |
+| link IEEE 802.15.4 | ✅ | ❌ (BLE) | ✅ |
+| **đếm SỐ LƯỢT trao đổi** | ❌ (đo thời lượng) | ❌ (đo RTT) | ✅ |
+| **khảo sát NHIỀU cài đặt DTLS** | ❌ | ❌ | ✅ |
 
-## 1. Tên tạm
+Bài này **không cạnh tranh** với hai bài trên. Nó nằm ở **giao** của chúng, và phải viết
+đúng như vậy ngay từ phần mở đầu.
 
-*When the Lightweight Handshake Stops Being Light: EDHOC under Post-Quantum Credentials on
-Constrained Links*
+## 1. Câu chuyện, ba câu
 
-Tránh chữ "reality check" vì đã có bài QUNAP dùng. Tránh "revisited" vì Computer Networks vừa
-có một bài. Nhan đề nên nêu ĐIỀU KIỆN, vì đóng góp là chỉ ra điều kiện chứ không phải bác bỏ
-giao thức.
+Fedrecheski đo được EDHOC nhỏ hơn DTLS **×6 đến ×14 về cỡ gói**, nhưng thời lượng bắt tay
+chỉ cải thiện **×1,44**. Lợi thế kích thước đã không chuyển thành lợi thế tương xứng, **ngay
+ở chế độ cổ điển**. Bài này hỏi chuyện gì xảy ra khi chứng thư hậu lượng tử đẩy kích thước
+qua ngưỡng khung.
 
-## 2. Vì sao là bài KIỂM TOÁN chứ không phải bài phương pháp
+⭐ Câu mở đầu **mượn số của chính bài chuẩn đối chiếu**. Đó là cách mở mạnh nhất cho bài kiểm
+toán: không phải tôi nghi ngờ, mà chính phép đo của họ đã hé ra.
 
-Theo [[feedback-tim-de-tai-kiem-toan-khong-phai-cho-trong]]: hỏi **giả định chịu lực nào chưa
-ai đo**, không hỏi chỗ trống nào chưa ai chiếm.
+## 2. Tên tạm
 
-Giả định chịu lực ở đây là **"EDHOC nhẹ hơn DTLS nên hợp cho thiết bị ràng buộc"**. Nó có mặt
-trong chính RFC, trong tài liệu quảng bá, và trong quần thể bài trích lại. Chưa ai đo nó
-**dưới điều kiện hậu lượng tử**, mà điều kiện đó đang tới.
+*Does the Lightweight Handshake Stay Lightweight? EDHOC, DTLS 1.3 and Post-Quantum
+Credentials on IEEE 802.15.4 Links*
 
-⚠ Venue: **Computer Communications** có tiền lệ đúng dạng, bài *"From theory to practice"* về
-cấp phát SF trong LoRaWAN (2025). ⛔ **Không** gửi Computers & Security (cấm bài AI/ML, không
-liên quan nhưng nhớ luật đọc danh sách loại trừ ở vị trí 0).
+## 3. Đóng góp, xếp lại theo sức nặng THẬT
 
-## 3. Đóng góp, xếp theo sức nặng
+**C1 (MẠNH NHẤT, và không bài nào chạm tới) — ba cài đặt DTLS, ba giới hạn khác nhau.**
+Đo ở MTU 102 B, payload một khung 802.15.4:
 
-**C1. Một giới hạn không phụ thuộc thiết kế.** Khoá đóng gói ML-KEM-512 là 800 B, tức **7,8
-lần** payload khung 802.15.4 (102 B). Nên CoAP block-wise bị kích hoạt **ngay ở message_1**,
-ở mọi bộ tham số, bất kể chọn xác thực thế nào. Không thiết kế lại được, vì khoá công khai
-KEM bắt buộc lên dây.
+| | tại MTU 102 | thứ chặn nó |
+|---|---|---|
+| mbedTLS 3.6.2 | chạy, kể cả 32 mảnh | không thấy giới hạn trong dải quét |
+| GnuTLS 3.8.13 | tới ~23 mảnh | **số mảnh**, 23 được / 28 hỏng |
+| OpenSSL 3.6.4 | **không chạy được** | **sàn MTU 256** (`DTLS1_MIN_MTU`) |
 
-**C2. Lợi thế ĐẢO CHIỀU chứ không co lại.** DTLS 1.3 cắt ở tầng bắt tay và truyền theo
-flight, nên số vòng là hằng số bất kể kích thước (RFC 9147 §5.5). EDHOC trên CoAP truyền theo
-khối và **lock-step** (RFC 7959: *"multiple request-response pairs"*), nên số vòng nở tuyến
-tính. Cổ điển hai bên hoà ở 2 vòng; hậu lượng tử EDHOC lên 140 còn DTLS vẫn 2.
+Hai trục **trực giao**, mỗi trục tách sạch đúng cài đặt của nó. Hệ quả thực tiễn: **OpenSSL
+không chạy DTLS trên link 802.15.4 ở BẤT KỲ cỡ chứng thư nào**, kể cả cổ điển. Đây là thứ
+người triển khai cần biết mà chưa tài liệu nào nói.
 
-**C3. Không gian chỉnh đã quét hết, không có lối ra.** Quét toàn dải cỡ khối RFC 7959 cho
-phép: tối ưu vẫn thua 4 đến 8 lần, tối ưu nằm ở BIÊN chứ không phải điểm trong, và tối ưu
-**không với tới** trên RIOT vì `CONFIG_NANOCOAP_BLOCK_SIZE_MAX = COAP_BLOCKSIZE_64` là trần
-biên dịch. Thêm: tối ưu độ trễ (1024) và tối ưu năng lượng (512) **nằm ở hai chỗ khác nhau**.
+⚠ Ba cài đặt lệch nhau quá xa nên **không được viết thành tuyên bố về giao thức DTLS**. Chỉ
+là tuyên bố về từng cài đặt. Script tự in đúng cảnh báo đó.
 
-**C4. Lối thoát chuẩn tắc tồn tại trên giấy nhưng vắng mặt tại chỗ cần.** Q-Block (RFC 9177)
-cho phép NON và ít lượt hơn, nhưng: không có trong Contiki-NG, không có trong RIOT, ở libcoap
-là cờ phải bật tay, và **RFC 9668 lẫn RFC 9528 nhắc RFC 9177 đúng 0 lần**.
+**C2 — đổi CHẾ ĐỘ TRUYỀN TẢI, không phải đổi con số.**
+DTLS cắt ở tầng bắt tay và đi theo flight nên số lượt là hằng số [RFC 9147]. EDHOC trên CoAP
+đi theo khối và **lock-step**, RFC 7959 ghi rõ *"multiple request-response pairs"*, nên số
+lượt nở tuyến tính. Cổ điển hai bên hoà; hậu lượng tử thì tách hẳn.
+✅ Đã đo: mô hình khớp aiocoap **7/7** trên datagram thật, ở cả macOS lẫn Linux.
 
-⚠ **C5 (chỉ khi làm được đo thật)** đo trên testbed, xem mục 6.
+**C3 — điều kiện mà CHÍNH CHUẨN tự khai, chưa ai đo.**
+RFC 9668 §1: lợi thế *"can be lost"* khi gặp block-wise, và hai lượt chỉ đạt được khi
+`message_3` *"relatively small ... within target MTU sizes"*. §3.2.2 Step 3.1 còn có đường lui
+chuẩn tắc. Chưa ai đo bao giờ điều kiện đó vỡ.
 
-## 4. Bố cục
+**C4 — giới hạn KHÔNG phụ thuộc thiết kế.**
+Khoá đóng gói ML-KEM-512 là **800 B**, tức **7,8 lần** payload khung 802.15.4 (102 B).
+Block-wise kích hoạt **ngay ở message_1**, ở mọi bộ tham số, bất kể chọn xác thực thế nào.
+Không thiết kế lại được, vì khoá công khai KEM bắt buộc lên dây.
+
+## 4. Cái gì ĐÃ BỎ khỏi bản 1, và vì sao
+
+| bỏ | lý do |
+|---|---|
+| trục "kích thước EDHOC hậu lượng tử" làm đóng góp | Fraile et al. đã làm, **trên nRF52840 thật kèm năng lượng** |
+| trục "quét cỡ khối CoAP" làm đóng góp | Fraile et al. đã quét đúng dải 32–1024 |
+| mọi phát biểu về **giây** và **năng lượng** | không đo được ở đây, và hai bài kia đã đo tốt hơn |
+
+⇒ Hai trục đó **vẫn giữ trong bài**, nhưng ở vai **nền dẫn có trích dẫn**, không phải đóng góp.
+
+## 5. Bố cục
 
 | mục | nội dung | trạng thái |
 |---|---|---|
-| 1 | Mở đầu: giả định chịu lực và vì sao nó tới hạn | chưa viết |
-| 2 | Nền: EDHOC, DTLS 1.3, CoAP block-wise, 6LoWPAN | chưa viết |
-| 3 | **Điều kiện mà chuẩn tự khai**: RFC 9668 §1 và §3.2.2 Step 3.1 | ✅ có trích dẫn gốc |
-| 4 | Mô hình chi phí: byte, lượt trao đổi, khung phải phát | ✅ spike 2+4 |
-| 5 | Kết quả phân tích, 9 bộ tham số NIST | ✅ spike 1+4 |
-| 6 | Không gian chỉnh: đường cong cỡ khối, **HÌNH CHÍNH** | ✅ spike 3 |
-| 7 | Khảo sát cài đặt: Contiki-NG, RIOT, libcoap | ✅ đã đọc mã |
-| 8 | Đo trên testbed | ⛔ CHƯA LÀM |
-| 9 | Bàn luận: hàm ý cho thiết kế hồ sơ EDHOC hậu lượng tử | chưa viết |
-| 10 | Đe doạ tới tính hợp lệ | ✅ đã liệt kê, mục 7 dưới đây |
+| 1 | Mở đầu: mượn ×6–14 so với ×1,44 của Fedrecheski làm câu hỏi | ✅ có số |
+| 2 | Nền: EDHOC, DTLS 1.3, CoAP block-wise, 802.15.4 | chưa viết |
+| 3 | Điều kiện chuẩn tự khai (RFC 9668 §1, §3.2.2) | ✅ có trích gốc |
+| 4 | Mô hình chi phí: byte, lượt, khung phải phát | ✅ `analysis/model.py` |
+| 5 | Đối chiếu mô hình với cài đặt độc lập (7/7) | ✅ M1 |
+| 6 | **Khảo sát ba cài đặt** ← ĐÓNG GÓP CHÍNH | ✅ M3 |
+| 7 | Bàn luận: hàm ý cho hồ sơ EDHOC hậu lượng tử | chưa viết |
+| 8 | Đe doạ tới tính hợp lệ | ✅ đã liệt kê |
 
-**Hình chính** (mục 6): trục hoành cỡ khối 16…1024, trục tung E[lượt] và E[khung] hai thang,
-đường ngang của DTLS nằm dưới hẳn, vạch đứng ở trần RIOT = 64, đánh dấu hai điểm tối ưu khác
-nhau của hai trục. Một hình kể trọn C2 và C3.
+**Hình**: `fig0` cơ chế (TikZ) · `fig1` tỉ số byte · `fig2` số lượt kèm điểm đo ·
+`fig3` quét cỡ khối · **`fig4` khảo sát cài đặt, hình chính** · `fig5` phân rã bản tin.
+Tất cả sinh bằng `bash figures/build.sh`.
 
-⭐ Dùng bộ style nhà: `transaction-figure-kit`. Hình ngang của kit là để TRẢI HAI CỘT.
-
-## 5. Định vị so với công trình liên quan
-
-**Mục tiêu kiểm toán có tên**: *A Hybrid EDHOC Protocol* (MobiSec'25, 12/2025). Bài đó đề
-xuất EDHOC hậu lượng tử bằng KEM tạm thời và **tự báo** payload đi từ ≈64 B lên ≈2300–2400 B.
-Trong toàn văn: **"DTLS" 3 lần, "6LoWPAN" và "fragment" 0 lần**. Tính theo mô hình ở đây, đề
-xuất đó rơi vào **42 lượt**, tức thua DTLS 1.3 **cổ điển** 21 lần.
-
-⚠ Viết mục này ở giọng **kiểm toán chứ không phải đối đầu**. Bài đó không sai trong phạm vi
-nó tự đặt; điều nó bỏ sót là trục truyền tải. Đó chính là chỗ bài này bổ vào.
-
-## 6. ⛔ Việc THỰC NGHIỆM còn thiếu, và vì sao không bỏ qua được
-
-Luật của nhà: **thực nghiệm TRƯỚC, rồi mới viết từng section**
-([[feedback-sua-theo-section-va-qa-tung-buoc]]). Hiện tại bài mới có **phân tích + đọc chuẩn +
-đọc mã**, chưa có **đo**. Với Computer Communications, nơi tiền lệ là *"from theory to
-practice"*, nộp bản chỉ có phân tích là hở đúng chỗ phản biện sẽ chọc.
-
-Tối thiểu phải có:
-
-1. **Chạy thật trên Contiki-NG hoặc RIOT** trong Cooja/native, đo số lượt và thời gian bắt
-   tay khi bơm payload cỡ hậu lượng tử. Không cần cài ML-KEM thật: chỉ cần **độn payload**
-   đúng kích thước, vì lập luận nằm ở KÍCH THƯỚC chứ không ở phép toán.
-2. **Đối chiếu DTLS 1.3** trên cùng nền, cùng đường truyền.
-3. **Mất theo cụm** thay giả định độc lập.
-
-⚠ Điểm 1 là chỗ rẻ bất ngờ: **không cần phần cứng lượng tử, không cần cài PQC**, chỉ cần độn
-byte. Đây là lý do hướng này khả thi trong khi bốn hướng quantum trước đều chết.
-
-## 7. Đe doạ tới tính hợp lệ, khai trước
+## 6. Đe doạ tới tính hợp lệ, khai trước
 
 | đe doạ | mức | xử lý |
 |---|---|---|
-| `MAC_AND_SEC = 25` là ước lượng | thấp | 800 so với 102 thì vài byte header không lật được kết luận. Vẫn phải trích nguồn. |
-| Giả định mất ĐỘC LẬP | **trung bình** | Mất theo cụm CÓ LỢI cho khối lớn ⇒ có thể dịch điểm tối ưu. Phải chạy Gilbert-Elliott. |
-| Phân rã theo bản tin lệch 4,2% so bảng gốc | thấp | Đã khai. Không dùng cho số tuyệt đối. |
-| Phạm vi chỉ là EDHOC-trên-CoAP | **phải khai rõ** | Đúng cấu hình RFC 9668. Nền khác thì lập luận không áp. |
-| RTT mesh 100–500 ms chưa có nguồn | trung bình | Lấy từ đo thật ở mục 6, đừng trích dải. |
-| DTLS 1.3 "luôn 2 vòng" | trung bình | Đúng cho bắt tay đầy đủ 1-RTT. Phải khai điều kiện, và kiểm khi flight rất dày. |
+| Không đo trên phần cứng ràng buộc | **cao** | Khai thẳng. Trục số lượt là tính chất giao thức nên đo được ở tầng vận chuyển; trục giây và năng lượng **không tuyên bố gì** |
+| Ba cài đặt lệch nhau ⇒ không suy ra giao thức | trung bình | Đã khai trong chính script và trong bảng |
+| `MAC_AND_SEC = 25` là ước lượng | thấp | 800 so với 102 thì vài byte không lật kết luận |
+| Giả định mất ĐỘC LẬP | trung bình | Chưa chạy mất theo cụm. Khai, hoặc bỏ hẳn trục xác suất |
+| Phạm vi chỉ EDHOC-trên-CoAP | phải khai | Đúng cấu hình RFC 9668 |
+| Mới có **abstract** Fedrecheski | **phải xử lý** | Lấy toàn văn trước khi viết mục 1 |
 
-## 8. Việc tiếp theo, xếp theo thứ tự
+## 7. Việc còn lại, theo thứ tự
 
-1. Dựng testbed và đo (mục 6). **Đây là nút thắt, mọi thứ khác chờ nó.**
-2. Mất theo cụm.
-3. Trục quần thể: đếm bài còn trích lợi thế EDHOC không kèm điều kiện.
-4. Chốt tham số còn treo.
-5. Viết, theo luật từng section QA xong mới sang cái khác.
+1. **Lấy toàn văn Fedrecheski** (HAL chặn bot; thử qua thư viện trường hoặc hỏi tác giả).
+2. Xác nhận họ không đếm số lượt và không bàn lock-step.
+3. Viết mục 6 trước, vì đó là đóng góp chính và số đã có sẵn.
+4. Cân nhắc chạy **artifact PQ-EDHOC của Fraile** để có nhánh EDHOC thật thay vì mô hình.
 
 ---
 
-⛔ **Nhắc**: IoT-70170 hạn 23/09 là hạn CỨNG duy nhất, gói đã sẵn từ 27/08.
-Bài này không có hạn.
+⛔ **Nhắc**: IoT-70170 hạn **23/09** và TAI hạn **29/09** là hai hạn CỨNG. Bài này không có hạn.
