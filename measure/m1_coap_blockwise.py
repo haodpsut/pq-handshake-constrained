@@ -26,14 +26,23 @@ import sys
 import aiocoap
 import aiocoap.interfaces
 import aiocoap.resource as resource
+from aiocoap.optiontypes import BlockOption
 
-# Ép cỡ khối về 64 B, đúng mặc định VÀ trần biên dịch của Contiki-NG và RIOT.
-# CoAP: cỡ khối = 2^(SZX+4). SZX=2 -> 64. aiocoap mặc định SZX=6 -> 1024.
-# ⚠ PHẢI vá thuộc tính LỚP: `interfaces.py` gán maximum_block_size_exp lúc import, nên vá
-# hằng số trong numbers.constants sau đó KHÔNG có tác dụng. Bản 1 vấp đúng chỗ này.
+# Cỡ khối 64 B, đúng mặc định VÀ trần biên dịch của Contiki-NG và RIOT.
+# CoAP: cỡ khối = 2^(SZX+4). SZX=2 -> 64.
+#
+# ⛔ HAI BẢN TRƯỚC ĐỀU VÁ RUỘT THƯ VIỆN, VÀ CÁCH ĐÓ HỎNG THEO PHIÊN BẢN.
+# Bản trước gán thẳng `aiocoap.interfaces.EndpointAddress.maximum_block_size_exp = 2`.
+# Ở aiocoap 0.4.7 đó là thuộc tính lớp thường nên gán được; ở **0.4.17 nó là `property`**,
+# nên phép gán KHÔNG có tác dụng và **thất bại IM LẶNG**. Hậu quả đo được: cùng script,
+# máy Mac (0.4.7) báo 7/7 khớp, máy Linux (0.4.17) báo 2/7 -- vì Linux vẫn dùng khối 1024
+# mặc định (4415 B ra 5 lượt = 4415/1024, không phải 69 lượt = 4415/64).
+#
+# ⇒ Con số "7/7" cũ là ăn may theo phiên bản, không phải kết quả. Bản này KHÔNG vá ruột nữa:
+# client TỰ KHAI Block2 trong yêu cầu, đúng cơ chế RFC 7959 cho phép bên nhận đề nghị cỡ
+# khối, rồi KIỂM LẠI cỡ khối thực nhận và DỪNG nếu khác. Cách này không phụ thuộc phiên bản.
 SZX = 2
 BLOCK_SIZE = 2 ** (SZX + 4)
-aiocoap.interfaces.EndpointAddress.maximum_block_size_exp = SZX
 
 # NGƯỠNG KÍCH HOẠT block-wise. aiocoap mặc định `maximum_payload_size = 1124`
 # (interfaces.py:153), dùng ở blockwise.py:114 làm điều kiện quyết định. Đó là con số hợp lý
@@ -43,7 +52,6 @@ aiocoap.interfaces.EndpointAddress.maximum_block_size_exp = SZX
 # ⚠ Đây là chỗ phép đo và mô hình PHẢI dùng CÙNG một ngưỡng, nếu không thì lệch là do cấu
 # hình chứ không do mô hình sai. Bản 2 chạy lần đầu lệch 3/7 đúng vì lý do này.
 FRAME_PAYLOAD = 102
-aiocoap.interfaces.EndpointAddress.maximum_payload_size = FRAME_PAYLOAD
 
 SERVER_PORT = 15683
 RELAY_PORT = 15684
@@ -129,6 +137,9 @@ async def main():
         res.size = size
         relay.reset()
         req = aiocoap.Message(code=aiocoap.GET, uri="coap://127.0.0.1:%d/p" % RELAY_PORT)
+        # Tự khai cỡ khối mong muốn thay vì vá ruột thư viện.
+        if size > FRAME_PAYLOAD:
+            req.opt.block2 = BlockOption.BlockwiseTuple(0, False, SZX)
         try:
             resp = await asyncio.wait_for(ctx_c.request(req).response, timeout=30)
         except Exception as e:                                   # noqa: BLE001
@@ -138,6 +149,15 @@ async def main():
             continue
         assert len(resp.payload) == size, \
             "payload ve %d, mong doi %d" % (len(resp.payload), size)
+        # ⭐ KIỂM CẤU HÌNH ĐÃ CÓ HIỆU LỰC. Nếu cỡ khối thực khác cỡ đã yêu cầu thì phép đo
+        # không đo cái mình tưởng, và im lặng bỏ qua chính là cách sinh ra "7/7" giả.
+        if size > FRAME_PAYLOAD:
+            got_szx = resp.opt.block2.size_exponent if resp.opt.block2 else None
+            if got_szx != SZX:
+                print("  ⛔ DỪNG: yêu cầu cỡ khối %d (SZX=%d) nhưng nhận SZX=%s."
+                      % (BLOCK_SIZE, SZX, got_szx))
+                print("     Phép đo sẽ không đo cái mình tưởng. Sửa trước, đừng đọc số.")
+                return 3
         pred, meas = predicted(size), relay.c2s
         if pred == meas:
             ok += 1
