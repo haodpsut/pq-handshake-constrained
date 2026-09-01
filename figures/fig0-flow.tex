@@ -1,0 +1,128 @@
+% =====================================================================
+%  HÌNH 0 (FLOW) — CƠ CHẾ: vì sao cùng một lượng byte lại cho số vòng khác nhau
+%
+%  Đây là hình KHÁI NIỆM của bài. Nó phải trả lời đúng một câu: hai giao thức
+%  mang CÙNG khối lượng khoá hậu lượng tử, nhưng một bên trả bằng SỐ VÒNG còn
+%  bên kia trả bằng ĐỘ DÀY của flight.
+%
+%  ⚠ MỌI CON SỐ ở đây đến từ figures/out/numbers.tex, do make_figures.py sinh
+%  ra từ analysis/model.py. KHÔNG gõ số vào tệp này: gõ tay là tạo chỗ ở thứ
+%  hai cho cùng một con số, và chạy lại mô hình sẽ không cập nhật hình.
+%
+%  Dịch: pdflatex fig0-flow.tex   (chạy từ thư mục figures/)
+% =====================================================================
+\documentclass[border=3pt]{standalone}
+\usepackage{tikz}
+\usepackage{amsmath}
+\input{../../../transaction-figure-kit/flow/txstyle.tex}
+\usetikzlibrary{decorations.pathreplacing}
+\input{out/numbers.tex}
+
+\tikzset{
+  actor/.style={blk, minimum width=19mm, minimum height=7mm, font=\scriptsize},
+  life/.style={draw=inkgray!55, line width=0.5pt, dash pattern=on 2pt off 2pt},
+  msg/.style={->, draw=inkgray, line width=0.5pt},
+  cmsg/.style={->, draw=accent, line width=0.7pt},
+  ackm/.style={->, draw=inkgray!60, line width=0.45pt, dash pattern=on 2pt off 1.5pt},
+  mlab/.style={font=\tiny, text=inkgray, fill=white, inner sep=1pt},
+  rt/.style={font=\tiny\itshape, text=accent},
+  panel/.style={draw=inkgray!35, line width=0.4pt, rounded corners=1pt,
+                inner sep=3.5mm},
+  ptitle/.style={font=\scriptsize\bfseries, text=inkgray},
+}
+
+\begin{document}
+\begin{tikzpicture}[x=1cm, y=1cm]
+
+% =====================================================================
+% (a) EDHOC trên CoAP: block-wise LOCK-STEP — mỗi khối MỘT vòng
+% =====================================================================
+\begin{scope}[shift={(0,0)}]
+  \node[actor] (I) at (0,0)   {Initiator};
+  \node[actor] (R) at (4.2,0) {Responder};
+  \foreach \a in {I,R} \draw[life] (\a.south) -- ++(0,-6.2);
+
+  % message_1, cắt khối
+  \node[rt, anchor=west] at (-1.85,-0.55) {message\_1};
+  \draw[cmsg] (I|-0,-0.9) -- node[mlab]{Block2 \#0 (\numCoapBlock\,B)} (R|-0,-0.9);
+  \draw[ackm] (R|-0,-1.35) -- node[mlab]{ACK} (I|-0,-1.35);
+  \draw[cmsg] (I|-0,-1.8) -- node[mlab]{Block2 \#1} (R|-0,-1.8);
+  \draw[ackm] (R|-0,-2.25) -- node[mlab]{ACK} (I|-0,-2.25);
+  \node[font=\scriptsize, text=inkgray] at (2.1,-2.72) {$\vdots$};
+  \draw[cmsg] (I|-0,-3.15) -- node[mlab]{Block2 \#\the\numexpr\numExchOnePQ-1\relax}
+              (R|-0,-3.15);
+  \draw[ackm] (R|-0,-3.6) -- node[mlab]{ACK} (I|-0,-3.6);
+
+  % ngoặc: số vòng của message_1
+  \draw[decorate, decoration={brace, amplitude=3pt, mirror}, inkgray!70,
+        line width=0.4pt] (4.75,-0.9) -- (4.75,-3.6)
+        node[midway, right=3pt, rt, align=left]
+        {\numExchOnePQ{} round trips\\ \tiny(\numMsgOnePQ\,B $\div$ \numCoapBlock\,B)};
+
+  % message_2 và _3, rút gọn
+  \node[rt, anchor=west] at (-1.85,-4.15) {message\_2};
+  \draw[cmsg] (R|-0,-4.45) -- node[mlab]{\numExchTwoPQ{} blocks, lock-step} (I|-0,-4.45);
+  \node[rt, anchor=west] at (-1.85,-5.15) {message\_3};
+  \draw[cmsg] (I|-0,-5.45) -- node[mlab]{\dots} (R|-0,-5.45);
+
+  \node[ptitle, align=center] at (2.1,0.85)
+    {(a) EDHOC over CoAP\\[-1pt] \tiny block-wise, LOCK-STEP [RFC 7959]};
+  \node[font=\scriptsize, text=accent, align=center] at (2.1,-6.75)
+    {TOTAL \numExchTotalPQ{} round trips};
+\end{scope}
+
+% =====================================================================
+% (b) DTLS 1.3: theo FLIGHT — nhiều datagram, vẫn hai vòng
+% =====================================================================
+\begin{scope}[shift={(9.4,0)}]
+  \node[actor] (C) at (0,0)   {Client};
+  \node[actor] (S) at (4.2,0) {Server};
+  \foreach \a in {C,S} \draw[life] (\a.south) -- ++(0,-6.2);
+
+  % flight 1: nhiều bản ghi bắn liên tiếp, KHÔNG chờ
+  \node[rt, anchor=west] at (-1.75,-0.55) {flight 1};
+  \foreach \y in {0.9, 1.12, 1.34, 1.56} {
+    \draw[cmsg] (C|-0,-\y) -- (S|-0,-\y);
+  }
+  \node[mlab, anchor=west] at (0.35,-1.78)
+    {several MTU-sized records, sent BACK-TO-BACK};
+  \draw[decorate, decoration={brace, amplitude=3pt, mirror}, inkgray!70,
+        line width=0.4pt] (4.75,-0.9) -- (4.75,-1.56)
+        node[midway, right=3pt, rt, align=left] {1 round trip};
+
+  % flight 2
+  \node[rt, anchor=west] at (-1.75,-2.75) {flight 2};
+  \foreach \y in {3.1, 3.32, 3.54, 3.76, 3.98} {
+    \draw[cmsg] (S|-0,-\y) -- (C|-0,-\y);
+  }
+  \draw[decorate, decoration={brace, amplitude=3pt, mirror}, inkgray!70,
+        line width=0.4pt] (4.75,-3.1) -- (4.75,-3.98)
+        node[midway, right=3pt, rt, align=left] {1 round trip};
+
+  % flight 3
+  \node[rt, anchor=west] at (-1.75,-4.6) {flight 3};
+  \foreach \y in {4.9, 5.12} {
+    \draw[cmsg] (C|-0,-\y) -- (S|-0,-\y);
+  }
+
+  \node[ptitle, align=center] at (2.1,0.85)
+    {(b) DTLS 1.3\\[-1pt] \tiny fragments at the handshake layer, by FLIGHT [RFC 9147]};
+  \node[font=\scriptsize, text=accent, align=center] at (2.1,-6.75)
+    {TOTAL \numDtlsRT{} round trips, INDEPENDENT of size};
+\end{scope}
+
+% =====================================================================
+% Câu chốt: cùng lượng byte, hai cách trả giá
+% =====================================================================
+\node[panel, fill=accent!4, draw=accent!45, text width=15.5cm, align=center,
+      font=\scriptsize] at (6.7,-7.9)
+  {Both carry the \emph{same} volume of post-quantum key material. Side (a) pays
+   in \textbf{round trips}, because each CoAP block is its own request--response
+   pair; side (b) pays in \textbf{flight thickness}, and its round-trip count does
+   not move. Classically \emph{both} take \numDtlsRT{} round trips: an EDHOC
+   message fits inside one \numFramePayload\,B frame, so block-wise never engages.
+   Post-quantum credentials break exactly that condition --- the ML-KEM-512
+   encapsulation key alone is \numKemFiveOneTwo\,B.};
+
+\end{tikzpicture}
+\end{document}

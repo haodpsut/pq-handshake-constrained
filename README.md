@@ -40,7 +40,27 @@ measure/    real network measurements
 
 results/    JSON written by the scripts. Numbers quoted in the paper come from here,
             never typed by hand.
+
+figures/    build.sh          one command, builds everything below
+  make_figures.py             five result figures, three tables, captions, numbers.tex
+  fig0-flow.tex               the mechanism figure (TikZ); reads numbers.tex
+  out/                        generated PDFs, PNGs and .tex fragments
 ```
+
+## Figures and tables
+
+Nothing here is typed by hand. The model lives once in `analysis/model.py`, the
+measurements in `results/*.json`, and everything else is generated from those two:
+
+```bash
+bash figures/build.sh
+```
+
+Captions are generated too, since they quote numbers of their own and would
+otherwise drift from the figures after a re-run. `fig0-flow.tex` is TikZ rather
+than matplotlib, so it reads its numbers from the generated `out/numbers.tex`;
+it is built by the same script, because a figure with its own private copy of a
+constant is a figure that silently goes stale.
 
 ## Install
 

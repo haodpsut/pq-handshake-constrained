@@ -388,6 +388,25 @@ def captions(m1, m3):
     body = "\n".join(r"\newcommand{\%s}{%s}" % (k, v) for k, v in defs.items())
     write_tex("captions.tex", body + "\n")
 
+    # ── SỐ cho hình TikZ ──────────────────────────────────────────────────────
+    # Hình flow vẽ bằng TikZ nên không gọi được Python. Nếu gõ số vào .tex thì có HAI chỗ
+    # cài đặt cùng một con số, và chạy lại mô hình sẽ không cập nhật hình. Nên xuất ra macro.
+    m768 = M.pq_messages("ML-KEM-768", "ML-DSA-65")
+    nums = {
+        "numFramePayload": M.FRAME_PAYLOAD,
+        "numCoapBlock": M.COAP_BLOCK,
+        "numDtlsRT": M.DTLS_FLIGHT_RT,
+        "numMsgOneClassic": M.CLASSIC_MSG["message_1"],
+        "numMsgOnePQ": m768["message_1"],
+        "numMsgTwoPQ": m768["message_2"],
+        "numExchOnePQ": M.exchanges_for_message(m768["message_1"]),
+        "numExchTwoPQ": M.exchanges_for_message(m768["message_2"]),
+        "numExchTotalPQ": M.edhoc_exchanges(m768),
+        "numKemFiveOneTwo": M.KEM["ML-KEM-512"][0],
+    }
+    write_tex("numbers.tex",
+              "\n".join(r"\newcommand{\%s}{%s}" % (k, v) for k, v in nums.items()) + "\n")
+
 
 def main():
     print("  Sinh hình và bảng. Mô hình: analysis/model.py · Số đo: results/*.json\n")

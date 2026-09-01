@@ -2,3 +2,6 @@ __pycache__/
 *.pyc
 .certs/
 .dtls-work/
+*.aux
+*.log
+*.out
