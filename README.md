@@ -68,8 +68,38 @@ and writes machine-readable JSON to `results/`.
 | CoAP block-wise costs one round trip per block | ✅ measured, aiocoap, 7/7 agreement with the model |
 | DTLS round trips stay constant as the handshake grows | ✅ measured, GnuTLS, datagrams ×1.37 while round trips ×1.00 |
 | DTLS **fails to complete** past ~23 fragments | ⛔ **RETRACTED.** It did not reproduce under a systematic sweep: GnuTLS fails at 10 fragments (MTU 600) yet succeeds at 22 (MTU 250), so no threshold exists. The original observation was an artefact of a broken harness, see below. |
-| DTLS 1.3 completes in 2 round trips | 📚 cited from RFC 9147, **not** measured here: no DTLS 1.3 implementation was available |
+| DTLS 1.3 completes in 2 round trips | 📚 cited from RFC 9147, **not** measured here: no available implementation offers DTLS 1.3 (OpenSSL 3.6.4's `s_server` still has no `-dtls1_3`) |
+| Three implementations behave very differently on a constrained link | ✅ measured on Linux, see below |
 | Latency and energy on a real 802.15.4 mesh | ⛔ **not measured.** Round-trip counts here are transport-level, on loopback. |
+
+## Three implementations, three different limits
+
+Measured on Ubuntu 24.04 at MTU 102, the payload an IEEE 802.15.4 frame carries after MAC and
+AES-CCM*. Certificates of 1090, 3170 and 5600 bytes stand in for post-quantum credentials.
+
+| implementation | at MTU 102 | what bounds it | cells completed |
+|---|---|---|---|
+| **mbedTLS 3.6.2** | completes, including 32 fragments | nothing found in range | 14/14 |
+| **GnuTLS 3.8.13** | completes to ~23 fragments | **fragment count**, 23 ok / 28 fails | 17/21 |
+| **OpenSSL 3.6.4** | never completes | **MTU floor at 256** (`DTLS1_MIN_MTU`), 250 fails / 300 ok | 9/21 |
+
+The axes are orthogonal and each separates its own implementation cleanly: OpenSSL fails with
+five fragments at MTU 250 and completes with nineteen at MTU 300, so fragment count explains
+nothing there; GnuTLS completes at MTU 102, so an MTU floor explains nothing there.
+
+This inverts the expectation the work started from. The search was for evidence that DTLS
+breaks under post-quantum credential sizes. What breaks is the *server-side* software:
+OpenSSL cannot run DTLS on an 802.15.4 link at any credential size, classical ones included.
+The implementation actually deployed on constrained devices handles the constrained link.
+
+Because the three differ so widely, none of this supports a statement about DTLS the protocol.
+It is a statement about three implementations, and the script says so in its own verdict.
+
+**One pair is excluded rather than reported as a failure.** mbedTLS cannot load the 15360-bit
+key at all (`mbedtls_x509_crt_parse_file` returns -0x3b00, exceeding `MBEDTLS_MPI_MAX_SIZE`).
+Its seven cells for that certificate read as "fails at every MTU including 600 with ten
+fragments", which looks like a link result; the library never reached the link. The positive
+control runs per (implementation, credential) pair to catch exactly this.
 
 ## A retracted finding, kept on the record
 
