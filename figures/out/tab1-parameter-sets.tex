@@ -1,0 +1,22 @@
+%% SINH TU figures/make_figures.py -- KHONG sua tay.
+\begin{table}[t]
+\centering
+\caption{Kích thước bắt tay và số lượt trao đổi cho chín bộ tham số NIST. Tỉ số cổ điển là 4.14$\times$ (chế độ chữ ký) và 8.85$\times$ (Static DH, không có bản hậu lượng tử).}
+\label{tab:params}
+\begin{tabular}{llrrrrr}
+\hline
+KEM & SIG & EDHOC (B) & DTLS (B) & tỉ số & lượt EDHOC & lượt DTLS \\
+\hline
+K512 & D44 & 7712 & 8390 & 1.09 & 103 & 2 \\
+K512 & D65 & 10130 & 10808 & 1.07 & 129 & 2 \\
+K512 & D87 & 13406 & 14084 & 1.05 & 171 & 2 \\
+K768 & D44 & 8416 & 9094 & 1.08 & 114 & 2 \\
+K768 & D65 & 10834 & 11512 & 1.06 & 140 & 2 \\
+K768 & D87 & 14110 & 14788 & 1.05 & 182 & 2 \\
+K1024 & D44 & 9280 & 9958 & 1.07 & 127 & 2 \\
+K1024 & D65 & 11698 & 12376 & 1.06 & 154 & 2 \\
+K1024 & D87 & 14974 & 15652 & 1.05 & 196 & 2 \\
+\hline
+\end{tabular}
+\\[2pt]{\footnotesize Số lượt EDHOC tính với cỡ khối 64 B, mặc định của Contiki-NG và RIOT. Số lượt DTLS theo RFC 9147, không đo ở đây.}
+\end{table}

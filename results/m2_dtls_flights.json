@@ -1,0 +1,46 @@
+{
+  "implementation": "gnutls-serv 3.8.13",
+  "dtls_version": "1.2",
+  "caveat": "GnuTLS 3.8.13 khong co DTLS 1.3; phep do nay chung minh CO CHE theo flight. Con so 'DTLS 1.3 = 2 vong' phai dan RFC 9147.",
+  "mtu": 102,
+  "counted": "UDP datagrams + direction changes via relay",
+  "turns_constant": true,
+  "rows": [
+    {
+      "bits": 2048,
+      "cert_bytes": 1090,
+      "handshake_completed": true,
+      "datagrams_c2s": 9,
+      "datagrams_s2c": 49,
+      "datagrams_total": 58,
+      "turns": 5
+    },
+    {
+      "bits": 4096,
+      "cert_bytes": 1785,
+      "handshake_completed": true,
+      "datagrams_c2s": 9,
+      "datagrams_s2c": 67,
+      "datagrams_total": 76,
+      "turns": 5
+    },
+    {
+      "bits": 8192,
+      "cert_bytes": 3170,
+      "handshake_completed": false,
+      "datagrams_c2s": 16,
+      "datagrams_s2c": 0,
+      "datagrams_total": 16,
+      "turns": 0
+    },
+    {
+      "bits": 15360,
+      "cert_bytes": 5600,
+      "handshake_completed": false,
+      "datagrams_c2s": 16,
+      "datagrams_s2c": 0,
+      "datagrams_total": 16,
+      "turns": 0
+    }
+  ]
+}

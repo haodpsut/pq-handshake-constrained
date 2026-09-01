@@ -1,0 +1,16 @@
+%% SINH TU figures/make_figures.py -- KHONG sua tay.
+\begin{table}[t]
+\centering
+\caption{Ba cài đặt DTLS trên đường truyền ràng buộc. MTU 102 B là payload một khung IEEE 802.15.4 sau MAC và AES-CCM*.}
+\label{tab:impls}
+\begin{tabular}{llll}
+\hline
+cài đặt & ô xong & xong ở MTU 102 & thứ chặn nó \\
+\hline
+gnutls & 17/21 & 1/3 & số mảnh: 23 được / 28 hỏng \\
+mbedtls & 14/14 & 2/2 & không thấy trong dải đã quét \\
+openssl & 9/21 & 0/3 & sàn MTU: 250 hỏng / 300 được \\
+\hline
+\end{tabular}
+\\[2pt]{\footnotesize Ba cài đặt bị chặn bởi ba thứ KHÁC NHAU, nên kết quả này KHÔNG chống đỡ một tuyên bố về giao thức DTLS, chỉ về từng cài đặt.}
+\end{table}
