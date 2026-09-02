@@ -1,11 +1,11 @@
 %% SINH TU figures/make_figures.py -- KHONG sua tay.
 \begin{table}[t]
 \centering
-\caption{Đối chiếu mô hình đếm lượt với một cài đặt CoAP độc lập (aiocoap 0.4.17). Datagram đếm bằng relay UDP đặt giữa client và server; 7/7 khớp.}
+\caption{Exchange-count model against an independent CoAP implementation (aiocoap 0.4.17). Datagrams are counted by a UDP relay between client and server; 7/7 agree.}
 \label{tab:validation}
 \begin{tabular}{lrrrc}
 \hline
-trường hợp & byte & mô hình & đo được & khớp \\
+case & byte & model & measured & agree \\
 \hline
 EDHOC msg_1 cổ điển & 37 & 1 & 1 & \checkmark \\
 EDHOC msg_2 cổ điển & 111 & 2 & 2 & \checkmark \\
@@ -16,5 +16,5 @@ EDHOC msg_2 + K768/D65 & 4415 & 69 & 69 & \checkmark \\
 EDHOC msg_3 + K768/D65 & 3322 & 52 & 52 & \checkmark \\
 \hline
 \end{tabular}
-\\[2pt]{\footnotesize Cỡ khối 64 B, ngưỡng kích hoạt 102 B. Phép đo xác nhận PHÉP ĐẾM; trễ và năng lượng KHÔNG đo ở đây.}
+\\[2pt]{\footnotesize Block size 64~B, engaging above 102~B. This validates the counting only; latency and energy are not measured here.}
 \end{table}

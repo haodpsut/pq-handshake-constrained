@@ -1,16 +1,16 @@
 %% SINH TU figures/make_figures.py -- KHONG sua tay.
 \begin{table}[t]
 \centering
-\caption{Ba cài đặt DTLS trên đường truyền ràng buộc. MTU 102 B là payload một khung IEEE 802.15.4 sau MAC và AES-CCM*.}
+\caption{Three DTLS implementations on a constrained link. The 102~B MTU is the payload of an IEEE~802.15.4 frame after the MAC header and AES-CCM$^*$.}
 \label{tab:impls}
 \begin{tabular}{llll}
 \hline
-cài đặt & ô xong & xong ở MTU 102 & thứ chặn nó \\
+implementation & cells & at frame MTU & bounded by \\
 \hline
-gnutls & 17/21 & 1/3 & số mảnh: 23 được / 28 hỏng \\
-mbedtls & 14/14 & 2/2 & không thấy trong dải đã quét \\
-openssl & 9/21 & 0/3 & sàn MTU: 250 hỏng / 300 được \\
+gnutls & 17/21 & 1/3 & fragments: 23 ok / 28 fails \\
+mbedtls & 14/14 & 2/2 & none found in range \\
+openssl & 9/21 & 0/3 & MTU floor: 250 fails / 300 ok \\
 \hline
 \end{tabular}
-\\[2pt]{\footnotesize Ba cài đặt bị chặn bởi ba thứ KHÁC NHAU, nên kết quả này KHÔNG chống đỡ một tuyên bố về giao thức DTLS, chỉ về từng cài đặt.}
+\\[2pt]{\footnotesize The three are bounded by different quantities, so these results characterise the implementations and not the DTLS protocol.}
 \end{table}

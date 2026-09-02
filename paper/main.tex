@@ -104,6 +104,29 @@ protocol rather than about three implementations of it.
 \input{../figures/out/tab2-model-vs-measured.tex}
 \input{../figures/out/tab3-implementations.tex}
 
+
+% =====================================================================
+\section*{Artifact Availability}
+
+All code, measurement scripts and result files are at
+\url{https://github.com/haodpsut/pq-handshake-constrained}. Every figure, table and numerical
+value in this letter is generated from the released result files by a single command; none is
+transcribed by hand, and the repository contains the checks that enforce this.
+
+% =====================================================================
+\section*{Acknowledgment}
+
+The authors used Anthropic's Claude (Opus~5) as an assistant throughout this work. Its use was
+substantial and covered three areas: drafting and editing the prose of all sections; writing
+the measurement, analysis and figure-generation code released with the artifact; and proposing
+the measurement design itself, including the implementation survey that became the principal
+result, the per-implementation positive controls, and the consistency checks between results,
+figures and text. Several intermediate findings it produced were subsequently retracted after
+its own re-checks, and those retractions are recorded in the repository history. All results
+were produced by executing the released code, and every number reported here was verified
+against the recorded run files by the authors, who take full responsibility for the content of
+this paper.
+
 \bibliographystyle{IEEEtran}
 \bibliography{refs}
 

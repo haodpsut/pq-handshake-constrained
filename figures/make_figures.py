@@ -80,12 +80,27 @@ def load(fname, what, expect=None):
     return d
 
 
+def _esc(x):
+    """Thoat ky tu dac biet cua LaTeX.
+
+    ⚠ Ban truoc khong thoat, nen mot ten truong hop chua `msg_1` sinh ra 56 loi
+    "Missing $ inserted". Bo sinh phai an toan KE CA khi nguon khong sach: du lieu do duoc
+    khong co nghia vu biet no se di vao LaTeX.
+    """
+    s = str(x)
+    for a, b in (("\\", r"\textbackslash{}"), ("&", r"\&"), ("%", r"\%"), ("$", r"\$"),
+                 ("#", r"\#"), ("_", r"\_"), ("{", r"\{"), ("}", r"\}"), ("~", r"\textasciitilde{}"),
+                 ("^", r"\textasciicircum{}")):
+        s = s.replace(a, b)
+    return s
+
+
 def texify(rows, header, caption, label, colspec, note=None):
     L = [r"\begin{table}[t]", r"\centering",
          r"\caption{%s}" % caption, r"\label{%s}" % label,
          r"\begin{tabular}{%s}" % colspec, r"\hline",
          " & ".join(header) + r" \\", r"\hline"]
-    L += [" & ".join(str(c) for c in r) + r" \\" for r in rows]
+    L += [" & ".join(_esc(c) for c in r) + r" \\" for r in rows]
     L += [r"\hline", r"\end{tabular}"]
     if note:
         L.append(r"\\[2pt]{\footnotesize %s}" % note)
@@ -115,13 +130,13 @@ def fig_size_ratio():
     x = range(len(names))
     ax.bar(x, ratios, color=C["blue"], width=0.6, edgecolor="black", linewidth=0.4)
     ax.axhline(M.D_CLASSIC / M.E_SIG, color=C["verm"], ls="--", lw=1.0,
-               label="cổ điển, chế độ chữ ký (%.2f×)" % (M.D_CLASSIC / M.E_SIG))
+               label="classical, signature mode (%.2f$\\times$)" % (M.D_CLASSIC / M.E_SIG))
     ax.axhline(M.D_CLASSIC / M.E_STATIC_DH, color=C["orange"], ls=":", lw=1.0,
-               label="cổ điển, Static DH (%.2f×) — KHÔNG có bản PQC"
+               label="classical, Static DH (%.2f$\\times$), no PQ variant"
                      % (M.D_CLASSIC / M.E_STATIC_DH))
     ax.axhline(1.0, color=C["gray"], lw=0.6)
     ax.set_xticks(list(x)); ax.set_xticklabels(names)
-    ax.set_ylabel("DTLS / EDHOC (tỉ số byte)")
+    ax.set_ylabel("DTLS / EDHOC (byte ratio)")
     ax.set_ylim(0, 9.6)
     # Đặt vào DẢI TRỐNG giữa hai đường mốc, không đặt "upper right" nơi chú giải đè lên
     # chính đường 8,85x mà nó đang giải thích.
@@ -141,24 +156,24 @@ def fig_exchanges(m1):
 
     fig, ax = plt.subplots(figsize=(W1, 2.4))
     ax.plot(sizes, coap, color=C["blue"], lw=1.2,
-            label="EDHOC/CoAP block-wise (mô hình)")
+            label="EDHOC over CoAP, block-wise (model)")
     ax.axhline(M.DTLS_FLIGHT_RT, color=C["verm"], ls="--", lw=1.2,
-               label="DTLS 1.3 theo flight [RFC 9147]")
+               label="DTLS 1.3, flight-based [RFC 9147]")
     ax.axvline(M.FRAME_PAYLOAD, color=C["gray"], ls=":", lw=0.8)
     # ⚠ LUẬT rút ra sau BỐN lần đè trong cùng một buổi vẽ: chữ đặt trong vùng vẽ phải cạnh
     # tranh chỗ với dữ liệu VÀ với chú giải, mà cả hai đều đổi theo dữ liệu. Nên chú thích
     # mốc đặt ở MÉP DƯỚI bằng toạ độ tương đối, chỗ duy nhất chắc chắn trống ở mọi hình này.
-    ax.text(M.FRAME_PAYLOAD + 90, 4.5, "khung 802.15.4 (%d B)" % M.FRAME_PAYLOAD,
+    ax.text(M.FRAME_PAYLOAD + 90, 4.5, "802.15.4 frame (%d B)" % M.FRAME_PAYLOAD,
             fontsize=6.5, color=C["gray"], va="bottom")
 
     if m1:
         mx = [r["bytes"] for r in m1["rows"]]
         my = [r["measured_c2s"] for r in m1["rows"]]
         ax.plot(mx, my, "o", color="black", ms=4, mfc="none", mew=0.9,
-                label="ĐO ĐƯỢC (aiocoap, %d/%d khớp)"
+                label="measured (aiocoap, %d/%d agree)"
                       % (m1["n_match"], m1["n_match"] + m1["n_mismatch"]))
-    ax.set_xlabel("kích thước bản tin bắt tay (byte)")
-    ax.set_ylabel("số lượt trao đổi")
+    ax.set_xlabel("handshake message size (byte)")
+    ax.set_ylabel("exchanges")
     ax.set_xlim(0, 5200); ax.set_ylim(0, 88)
     ax.legend(loc="upper left")
     save(fig, "fig2-exchanges")
@@ -171,14 +186,14 @@ def fig_blocksize():
     total = sum(M.pq_messages("ML-KEM-768", "ML-DSA-65").values())
     fig, (a1, a2) = plt.subplots(1, 2, figsize=(W2, 2.6))
 
-    for ax, idx, ylab, ttl in ((a1, 0, "kỳ vọng số lượt", "(a) trục ĐỘ TRỄ"),
-                               (a2, 1, "kỳ vọng số khung phải phát", "(b) trục NĂNG LƯỢNG")):
+    for ax, idx, ylab, ttl in ((a1, 0, "expected exchanges", "(a) latency axis"),
+                               (a2, 1, "expected frame transmissions", "(b) energy axis")):
         for p, col, mk, ls in ((0.00, C["blue"], "o", "-"),
                                (0.01, C["green"], "s", "--"),
                                (0.05, C["verm"], "^", "-.")):
             ys = [M.blocksize_cost(total, b, p)[idx] for b in M.BLOCK_SIZES]
             ax.plot(M.BLOCK_SIZES, ys, color=col, marker=mk, ls=ls,
-                    label="mất khung p=%.2f" % p)
+                    label="frame loss p=%.2f" % p)
             best = min(range(len(ys)), key=lambda i: ys[i])
             ax.plot(M.BLOCK_SIZES[best], ys[best], "*", color=col, ms=11, mec="black",
                     mew=0.4, zorder=5)
@@ -187,10 +202,10 @@ def fig_blocksize():
         ax.set_xlim(M.BLOCK_SIZES[0] * 0.8, M.BLOCK_SIZES[-1] * 1.15)
         ax.set_xticks(M.BLOCK_SIZES)
         ax.set_xticklabels([str(b) for b in M.BLOCK_SIZES])
-        ax.set_xlabel("cỡ khối CoAP (byte)"); ax.set_ylabel(ylab)
+        ax.set_xlabel("CoAP block size (byte)"); ax.set_ylabel(ylab)
         ax.set_title(ttl, fontsize=8)
     a1.axhline(M.DTLS_FLIGHT_RT, color=C["gray"], ls="--", lw=0.9)
-    a1.text(0.03, 0.06, "DTLS 1.3 = %d lượt" % M.DTLS_FLIGHT_RT,
+    a1.text(0.03, 0.06, "DTLS 1.3 = %d exchanges" % M.DTLS_FLIGHT_RT,
             transform=a1.transAxes, fontsize=7, color=C["gray"])
     a1.legend(loc="lower left", bbox_to_anchor=(0.0, 0.13))
 
@@ -220,8 +235,8 @@ def fig_implementations(m3):
         oky = [r["frags_est"] for r in rs if r["handshake_ok"]]
         bdx = [r["mtu"] for r in rs if not r["handshake_ok"]]
         bdy = [r["frags_est"] for r in rs if not r["handshake_ok"]]
-        ax.plot(okx, oky, "o", color=C["green"], ms=5, label="bắt tay xong")
-        ax.plot(bdx, bdy, "x", color=C["verm"], ms=6, mew=1.4, label="hỏng")
+        ax.plot(okx, oky, "o", color=C["green"], ms=5, label="handshake completes")
+        ax.plot(bdx, bdy, "x", color=C["verm"], ms=6, mew=1.4, label="fails")
         ax.axvline(M.FRAME_PAYLOAD, color=C["gray"], ls=":", lw=0.9)
         ax.set_xscale("log"); ax.set_yscale("log")
         # ⚠ Để matplotlib tự đánh vạch trên thang log thì các nhãn phụ chồng lên nhau thành
@@ -236,7 +251,7 @@ def fig_implementations(m3):
         ax.yaxis.set_minor_locator(mpl.ticker.NullLocator())
         ax.set_xlabel("MTU (byte)")
         ax.set_title(impl, fontsize=8)
-    axes[0].set_ylabel("số mảnh của bản tin")
+    axes[0].set_ylabel("fragments per message")
     # Chú giải đặt NGOÀI vùng vẽ để không tranh chỗ với điểm dữ liệu.
     handles, labels = axes[0].get_legend_handles_labels()
     fig.legend(handles, labels, loc="lower center", ncol=2, fontsize=7,
@@ -255,16 +270,16 @@ def fig_per_message():
 
     fig, ax = plt.subplots(figsize=(W1, 2.3))
     x = range(3); w = 0.26
-    ax.bar([i - w for i in x], classic, w, label="cổ điển", color=C["gray"],
+    ax.bar([i - w for i in x], classic, w, label="classical", color=C["gray"],
            edgecolor="black", lw=0.4)
-    ax.bar(list(x), [floor[k] for k in labels], w, label="SÀN: chỉ ML-KEM-512",
+    ax.bar(list(x), [floor[k] for k in labels], w, label="floor: ML-KEM-512 only",
            color=C["orange"], edgecolor="black", lw=0.4)
     ax.bar([i + w for i in x], [full[k] for k in labels], w,
            label="K768 + D65", color=C["blue"], edgecolor="black", lw=0.4)
     ax.axhline(M.FRAME_PAYLOAD, color=C["verm"], ls="--", lw=1.1)
     # Đặt ngay TRÊN vạch và ở KHOẢNG TRỐNG giữa hai nhóm cột, không đặt ở mép phải nơi cột
     # K768 vươn cao. Vị trí trống phụ thuộc dữ liệu, nên phải nhìn hình rồi mới chốt.
-    ax.text(0.52, M.FRAME_PAYLOAD * 1.12, "khung 802.15.4 (%d B)" % M.FRAME_PAYLOAD,
+    ax.text(0.52, M.FRAME_PAYLOAD * 1.12, "802.15.4 frame (%d B)" % M.FRAME_PAYLOAD,
             fontsize=6.5, color=C["verm"], ha="center", va="bottom")
     ax.set_yscale("log"); ax.set_xticks(list(x)); ax.set_xticklabels(labels)
     ax.set_ylabel("byte")
@@ -284,26 +299,26 @@ def tables(m1, m3):
         rows.append([kem.replace("ML-KEM-", "K"), sig.replace("ML-DSA-", "D"),
                      e, d, "%.2f" % r, M.edhoc_exchanges(msgs), M.DTLS_FLIGHT_RT])
     write_tex("tab1-parameter-sets.tex", texify(
-        rows, ["KEM", "SIG", "EDHOC (B)", "DTLS (B)", "tỉ số", "lượt EDHOC", "lượt DTLS"],
-        "Kích thước bắt tay và số lượt trao đổi cho chín bộ tham số NIST. "
-        "Tỉ số cổ điển là %.2f$\\times$ (chế độ chữ ký) và %.2f$\\times$ (Static DH, không có "
-        "bản hậu lượng tử)." % (M.D_CLASSIC / M.E_SIG, M.D_CLASSIC / M.E_STATIC_DH),
+        rows, ["KEM", "SIG", "EDHOC (B)", "DTLS (B)", "ratio", "EDHOC exch.", "DTLS exch."],
+        "Handshake size and exchange count for the nine NIST parameter sets. The classical "
+        "ratio is %.2f$\\times$ in signature mode and %.2f$\\times$ for Static DH, which has "
+        "no post-quantum variant." % (M.D_CLASSIC / M.E_SIG, M.D_CLASSIC / M.E_STATIC_DH),
         "tab:params", "llrrrrr",
-        "Số lượt EDHOC tính với cỡ khối %d B, mặc định của Contiki-NG và RIOT. "
-        "Số lượt DTLS theo RFC 9147, không đo ở đây." % M.COAP_BLOCK))
+        "EDHOC exchanges assume a %d~B block size, the default in Contiki-NG and RIOT. "
+        "The DTLS count is from RFC~9147 and is not measured here." % M.COAP_BLOCK))
 
     # B2: mô hình so với ĐO ĐƯỢC
     if m1:
         rows = [[r["case"], r["bytes"], r["predicted"], r["measured_c2s"],
                  r"\checkmark" if r["match"] else r"$\times$"] for r in m1["rows"]]
         write_tex("tab2-model-vs-measured.tex", texify(
-            rows, ["trường hợp", "byte", "mô hình", "đo được", "khớp"],
-            "Đối chiếu mô hình đếm lượt với một cài đặt CoAP độc lập (%s). "
-            "Datagram đếm bằng relay UDP đặt giữa client và server; %d/%d khớp."
+            rows, ["case", "byte", "model", "measured", "agree"],
+            "Exchange-count model against an independent CoAP implementation (%s). Datagrams "
+            "are counted by a UDP relay between client and server; %d/%d agree."
             % (m1["implementation"], m1["n_match"], m1["n_match"] + m1["n_mismatch"]),
             "tab:validation", "lrrrc",
-            "Cỡ khối %d B, ngưỡng kích hoạt %d B. Phép đo xác nhận PHÉP ĐẾM; "
-            "trễ và năng lượng KHÔNG đo ở đây." % (m1["block_size"], m1["frame_payload"])))
+            "Block size %d~B, engaging above %d~B. This validates the counting only; latency "
+            "and energy are not measured here." % (m1["block_size"], m1["frame_payload"])))
 
     # B3: giới hạn của từng cài đặt
     if m3:
@@ -315,24 +330,24 @@ def tables(m1, m3):
             at102 = [r for r in rs if r["mtu"] == 102]
             ok102 = sum(1 for r in at102 if r["handshake_ok"])
             if not bad:
-                bound = "không thấy trong dải đã quét"
+                bound = "none found in range"
             elif max(r["frags_est"] for r in ok) < min(r["frags_est"] for r in bad):
-                bound = "số mảnh: %d được / %d hỏng" % (
+                bound = "fragments: %d ok / %d fails" % (
                     max(r["frags_est"] for r in ok), min(r["frags_est"] for r in bad))
             elif min(r["mtu"] for r in ok) > max(r["mtu"] for r in bad):
-                bound = "sàn MTU: %d hỏng / %d được" % (
+                bound = "MTU floor: %d fails / %d ok" % (
                     max(r["mtu"] for r in bad), min(r["mtu"] for r in ok))
             else:
-                bound = "không tách được trên trục nào"
+                bound = "no separating axis"
             rows.append([impl, "%d/%d" % (len(ok), len(rs)),
                          "%d/%d" % (ok102, len(at102)) if at102 else "--", bound])
         write_tex("tab3-implementations.tex", texify(
-            rows, ["cài đặt", "ô xong", "xong ở MTU 102", "thứ chặn nó"],
-            "Ba cài đặt DTLS trên đường truyền ràng buộc. MTU 102 B là payload một khung "
-            "IEEE 802.15.4 sau MAC và AES-CCM*.",
+            rows, ["implementation", "cells", "at frame MTU", "bounded by"],
+            "Three DTLS implementations on a constrained link. The %d~B MTU is the payload of "
+            "an IEEE~802.15.4 frame after the MAC header and AES-CCM$^*$." % M.FRAME_PAYLOAD,
             "tab:impls", "llll",
-            "Ba cài đặt bị chặn bởi ba thứ KHÁC NHAU, nên kết quả này KHÔNG chống đỡ "
-            "một tuyên bố về giao thức DTLS, chỉ về từng cài đặt."))
+            "The three are bounded by different quantities, so these results characterise the "
+            "implementations and not the DTLS protocol."))
 
 
 def captions(m1, m3):
@@ -353,35 +368,39 @@ def captions(m1, m3):
 
     defs = {
         "capSizeRatio":
-            "Lợi thế kích thước của EDHOC so với DTLS 1.3 trên chín bộ tham số NIST. "
-            "Đường đứt: tỉ số cổ điển ở chế độ chữ ký (%.2f$\\times$). Đường chấm: chế độ "
-            "Static DH (%.2f$\\times$), chế độ này KHÔNG có bản hậu lượng tử vì method 1--3 "
-            "của RFC 9528 dựa trên Diffie--Hellman tĩnh."
+            "EDHOC's size advantage over DTLS~1.3 across the nine NIST parameter sets. Dashed: "
+            "the classical ratio in signature mode ($%.2f\\times$). Dotted: Static DH "
+            "($%.2f\\times$), a mode with no post-quantum variant, since methods~1--3 of "
+            "RFC~9528 rest on static Diffie--Hellman."
             % (M.D_CLASSIC / M.E_SIG, M.D_CLASSIC / M.E_STATIC_DH),
         "capExchanges":
-            "Số lượt trao đổi theo kích thước bản tin bắt tay. EDHOC trên CoAP dùng "
-            "block-wise lock-step nên số lượt nở tuyến tính; DTLS 1.3 truyền theo flight nên "
-            "giữ nguyên %d lượt bất kể kích thước [RFC 9147]. Vòng tròn rỗng là SỐ ĐO trên "
-            "một cài đặt CoAP độc lập, khớp mô hình %d/%d. Con số của DTLS là trích chuẩn, "
-            "không đo ở đây." % (M.DTLS_FLIGHT_RT, n_ok, n_all),
+            "Exchanges against handshake message size. EDHOC over CoAP uses lock-step "
+            "block-wise transfer, so its count grows linearly; DTLS~1.3 is flight-based and "
+            "holds at %d exchanges whatever the size [RFC~9147]. Open circles are measured on "
+            "an independent CoAP implementation, agreeing with the model in %d of %d cases. "
+            "The DTLS figure is cited, not measured here."
+            % (M.DTLS_FLIGHT_RT, n_ok, n_all),
         "capBlocksize":
-            "Quét toàn dải cỡ khối mà RFC 7959 cho phép, với bắt tay ML-KEM-768 + ML-DSA-65. "
-            "Sao là điểm tối ưu của từng đường. Vùng tô và vạch dọc ở %d B là TRẦN BIÊN DỊCH "
-            "của RIOT (\\texttt{CONFIG\\_NANOCOAP\\_BLOCK\\_SIZE\\_MAX}); cỡ khối bên phải "
-            "vạch không dùng được nếu không sửa firmware. Hai bảng có điểm tối ưu KHÁC NHAU, "
-            "nên không tồn tại một cấu hình tốt nhất chung cho cả độ trễ lẫn năng lượng."
+            "Sweep of every block size RFC~7959 permits, for an ML-KEM-768 with ML-DSA-65 "
+            "handshake. Stars mark each curve's optimum. The shaded region and the vertical "
+            "rule at %d~B mark RIOT's compile-time ceiling "
+            "(\\texttt{CONFIG\\_NANOCOAP\\_BLOCK\\_SIZE\\_MAX}); block sizes to its right "
+            "require rebuilding the firmware. The two panels place their optima differently, "
+            "so no single setting is best for both latency and energy."
             % M.RIOT_BLOCK_MAX,
         "capImplementations":
-            "Ba cài đặt DTLS trên đường truyền ràng buộc; vạch chấm là payload một khung IEEE "
-            "802.15.4 (%d B). Số ô bắt tay thành công: %s. Ba cài đặt bị chặn bởi ba thứ khác "
-            "nhau, nên kết quả này nói về TỪNG CÀI ĐẶT chứ không về giao thức DTLS."
+            "Three DTLS implementations on a constrained link; the dotted rule is the payload "
+            "of an IEEE~802.15.4 frame (%d~B). Cells completing a handshake: %s. The three are "
+            "bounded by different quantities, so this characterises the implementations rather "
+            "than the DTLS protocol."
             % (M.FRAME_PAYLOAD, impl_txt),
         "capPerMessage":
-            "Kích thước từng bản tin EDHOC. Đường đứt là payload một khung 802.15.4 (%d B). "
-            "Cột giữa là SÀN của lập luận: biến thể hậu lượng tử nhẹ nhất có thể hình dung, "
-            "chỉ ML-KEM-512 với xác thực cổ điển và chứng thư theo tham chiếu. Ngay ở sàn đó, "
-            "riêng khoá đóng gói đã là %d B, tức %.1f lần payload khung, nên block-wise bị "
-            "kích hoạt ngay ở message\\_1 với mọi thiết kế."
+            "Size of each EDHOC message. The dashed rule is the payload of an IEEE~802.15.4 "
+            "frame (%d~B). The middle bars are the floor of the argument: the lightest "
+            "post-quantum variant conceivable, ML-KEM-512 with classical authentication and "
+            "credentials by reference. Even there the encapsulation key alone is %d~B, "
+            "$%.1f\\times$ the frame payload, so block-wise engages in message\\_1 under any "
+            "design."
             % (M.FRAME_PAYLOAD, M.KEM["ML-KEM-512"][0],
                M.KEM["ML-KEM-512"][0] / M.FRAME_PAYLOAD),
     }

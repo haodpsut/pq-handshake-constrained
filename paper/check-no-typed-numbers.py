@@ -27,6 +27,7 @@ ALLOWED = {
     "7959": "RFC 7959", "9147": "RFC 9147", "9528": "RFC 9528", "9668": "RFC 9668",
     "802.15": "IEEE 802.15.4", "4944": "RFC 4944", "9177": "RFC 9177",
     "6": "6LoWPAN, ten cong nghe",
+    "5": "Claude Opus 5, ten cong cu trong muc khai dung AI",
 }
 
 

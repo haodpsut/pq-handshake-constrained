@@ -58,14 +58,17 @@ FRAME_PAYLOAD = 102
 SERVER_PORT = 15683
 RELAY_PORT = 15684
 
+# ⚠ TEN PHAI BANG TIENG ANH VA KHONG CO KY TU DAC BIET CUA LaTeX.
+# Cac ten nay di THANG vao bang cua ban thao. Ban truoc dat ten tieng Viet co dau va co
+# gach duoi (msg_1), gay 176 LOI LaTeX ma khong ai thay, vi lan dich truoc do khong ghi log.
 CASES = [
-    ("EDHOC msg_1 cổ điển",              37),
-    ("EDHOC msg_2 cổ điển",             111),
-    ("EDHOC msg_3 cổ điển",              77),
-    ("EDHOC msg_1 + ML-KEM-512",        808),
-    ("EDHOC msg_1 + ML-KEM-768",       1192),
-    ("EDHOC msg_2 + K768/D65",         4415),
-    ("EDHOC msg_3 + K768/D65",         3322),
+    ("EDHOC message 1, classical",       37),
+    ("EDHOC message 2, classical",      111),
+    ("EDHOC message 3, classical",       77),
+    ("EDHOC message 1, ML-KEM-512",     808),
+    ("EDHOC message 1, ML-KEM-768",    1192),
+    ("EDHOC message 2, K768/D65",      4415),
+    ("EDHOC message 3, K768/D65",      3322),
 ]
 
 
