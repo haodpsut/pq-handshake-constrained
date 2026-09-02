@@ -1,0 +1,32 @@
+{
+  "impl": "mbedtls 3.6.2",
+  "dtls_version": "1.2",
+  "mtu": 102,
+  "counted": "UDP datagrams + direction changes via relay",
+  "rows": [
+    {
+      "cert": "c8192.pem",
+      "cert_bytes": 3170,
+      "frags_est": 32,
+      "handshake_ok": true,
+      "datagrams": 55,
+      "turns": 6
+    },
+    {
+      "cert": "chain2.pem",
+      "cert_bytes": 6328,
+      "frags_est": 63,
+      "handshake_ok": true,
+      "datagrams": 85,
+      "turns": 6
+    },
+    {
+      "cert": "chain3.pem",
+      "cert_bytes": 9502,
+      "frags_est": 94,
+      "handshake_ok": true,
+      "datagrams": 115,
+      "turns": 6
+    }
+  ]
+}

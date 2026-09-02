@@ -112,14 +112,19 @@ def frags_for(nbytes):
     return 1 if nbytes <= FRAME_PAYLOAD else ceil_div(nbytes, PAYLOAD_PER_FRAG)
 
 
-def blocksize_cost(total_bytes, block, p_loss):
+def blocksize_cost(msgs, block, p_loss):
     """Kỳ vọng (số lượt, số khung phải phát) cho một cỡ khối, dưới tỉ lệ mất khung p_loss.
 
     Mỗi khối là một lượt CON, phải qua được cả chiều đi lẫn chiều về; khối hỏng thì truyền
     lại, nên kỳ vọng số lượt = số khối / P(qua).
+
+    ⛔ BẢN TRƯỚC NHẬN `total_bytes` RỒI CHIA ĐỀU CHO 3. Đó là xấp xỉ tôi đã bỏ ở
+    `pq_messages()` nhưng QUÊN bỏ ở đây, nên `model.py` tự mâu thuẫn với chính nó: hai hàm
+    trong cùng một tệp trả lời khác nhau cho cùng một câu hỏi. Đọc ngoài bắt được: ở cỡ khối
+    1024 thì chia đều cho 9 lượt, còn tính đúng từng bản tin cho **11** (2+5+4). Nay nhận
+    THẲNG dict kích thước từng bản tin để không thể lặp lại.
     """
-    per_msg = total_bytes / N_EDHOC_MSG
-    n_blocks = N_EDHOC_MSG * ceil_div(int(per_msg), block)
+    n_blocks = sum(ceil_div(v, block) for v in msgs.values())
     f = frags_for(block)
     p_ok = (1 - p_loss) ** (f + 1)
     if p_ok <= 0:

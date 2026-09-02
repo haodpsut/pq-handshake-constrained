@@ -45,9 +45,31 @@ claimed here.
 
 With that model, a post-quantum EDHOC handshake at ML-KEM-768 and ML-DSA-65 takes
 \numExchTotalPQ{} exchanges: \numExchOnePQ{} for message\_1 alone, whose \numMsgOnePQ~B do not
-fit in a \numFramePayload~B frame. DTLS~1.3 fragments at its own handshake layer and sends
-each flight back-to-back, so its round-trip count stays at \numDtlsRT{} regardless of size
-\cite{rfc9147}. Fig.~\ref{fig:exchanges} shows both.
+fit in a \numFramePayload~B frame. Fig.~\ref{fig:exchanges} shows the growth.
+
+\subsection{The DTLS comparator, measured rather than cited}
+
+DTLS fragments at its own handshake layer and sends each flight back-to-back, so its
+round-trip count should not grow with size \cite{rfc9147}. We measure this rather than assume
+it, at the same MTU and with the same relay. Certificate \emph{chains} are used to enlarge the
+handshake without enlarging the key, since the library rejects keys beyond its configured
+maximum integer size (Section~\ref{sec:threats}).
+
+Across \numDtlsMinFrag{} to \numDtlsMaxFrag{} fragments, \numDtlsImpl{} completes every
+handshake, and the datagram count grows from \numDtlsDatagramLo{} to \numDtlsDatagramHi{}
+($\times\numDtlsDatagramGrowth$) while the number of direction changes stays at
+\numDtlsMeasTurns{} throughout. The flight structure is therefore not an idealisation: at
+\numDtlsMaxFrag{} fragments, more than twice what a post-quantum handshake requires, the
+round-trip count has not moved.
+
+Two qualifications matter. The measurement is DTLS~\numDtlsMeasVersion, because none of the
+three implementations offers DTLS~1.3 over datagrams: GnuTLS lists protocol versions up to
+DTLS~1.2 only, mbedTLS accepts \texttt{tls12}, \texttt{dtls12} and \texttt{tls13} but no
+\texttt{dtls13}, and OpenSSL's \texttt{s\_server} has no DTLS~1.3 option. Four years after
+RFC~9147, the two-round-trip figure it specifies is not obtainable from any of them. And the
+constant here is \numDtlsMeasTurns{} direction changes rather than the \numDtlsRT{} round
+trips of DTLS~1.3, since DTLS~1.2 carries more flights; what is measured is the invariance,
+not the constant's value.
 
 The threshold, not the ratio, is what matters. Classically an EDHOC message fits inside one
 frame and block-wise never engages, so both protocols take \numDtlsRT{} round trips and
@@ -73,7 +95,7 @@ result.
 \textbf{GnuTLS is bounded by fragment count.} It completes at MTU~\numFramePayload, so no MTU
 floor applies, but it completes up to \numGnutlsFragOk{} fragments and fails from
 \numGnutlsFragBad{}. The failures are not an artefact of an impatient
-harness: given an allowance an order of magnitude beyond the probe timeout, the client still
+harness: given an allowance far beyond the probe timeout, the client still
 abandons the handshake on its own retransmission schedule, well inside that allowance. At
 \numFramePayload~B, \numGnutlsFragOk{} fragments cap a handshake message at about
 \numGnutlsCapKB~kB, which post-quantum credentials exceed.
@@ -95,8 +117,9 @@ reduce the exchange count, but each block then exceeds the frame and is fragment
 adaptation layer, where a lost fragment costs the whole block~\cite{rfc4944,rfc6282}. RFC~9177~\cite{rfc9177} defines
 block options that would reduce this cost, but neither constrained stack examined here
 implements them and the EDHOC-over-CoAP profile does not reference them. The optimum lies at the
-boundary of the permitted range rather than inside it, and even there the count remains an
-order of magnitude above DTLS.
+boundary of the permitted range rather than inside it, at \numBestBlock~B, and even there the
+count is \numBestExch{} exchanges against \numDtlsRT{} DTLS flights, a factor of
+$\numBestRatio\times$.
 
 Two further points close the objection. The optimum is not reachable on RIOT, whose
 \texttt{CONFIG\_NANOCOAP\_BLOCK\_SIZE\_MAX} is a compile-time ceiling at \numCoapBlock~B; and

@@ -199,7 +199,7 @@ def fig_exchanges(m1):
 # HÌNH 3 — HÌNH CHÍNH: quét cỡ khối, hai trục tối ưu LỆCH nhau, trần RIOT
 # ══════════════════════════════════════════════════════════════════════════════
 def fig_blocksize():
-    total = sum(M.pq_messages("ML-KEM-768", "ML-DSA-65").values())
+    msgs = M.pq_messages("ML-KEM-768", "ML-DSA-65")
     fig, (a1, a2) = plt.subplots(1, 2, figsize=(W2, 2.6))
 
     for ax, idx, ylab, ttl in ((a1, 0, "expected exchanges", "(a) latency axis"),
@@ -207,7 +207,7 @@ def fig_blocksize():
         for p, col, mk, ls in ((0.00, C["blue"], "o", "-"),
                                (0.01, C["green"], "s", "--"),
                                (0.05, C["verm"], "^", "-.")):
-            ys = [M.blocksize_cost(total, b, p)[idx] for b in M.BLOCK_SIZES]
+            ys = [M.blocksize_cost(msgs, b, p)[idx] for b in M.BLOCK_SIZES]
             ax.plot(M.BLOCK_SIZES, ys, color=col, marker=mk, ls=ls,
                     label="frame loss p=%.2f" % p)
             best = min(range(len(ys)), key=lambda i: ys[i])
@@ -371,7 +371,7 @@ def tables(m1, m3):
             "implementations and not the DTLS protocol.", wide=True))
 
 
-def captions(m1, m3):
+def captions(m1, m3, m4=None):
     """Sinh CAPTION ra .tex.
 
     Caption chứa số (tỉ số, số ô khớp, ngưỡng), nên nó cũng là bề mặt tuyên bố và cũng phải
@@ -472,6 +472,14 @@ def captions(m1, m3):
     # chỗ ở thứ hai: đổi MAC_AND_SEC trong model.py thì hình đổi mà câu văn thì không.
     nums["numKemFrameRatio"] = "%.1f" % (M.KEM["ML-KEM-512"][0] / M.FRAME_PAYLOAD)
     nums["numDecompError"] = "%.1f" % abs(M.decomposition_error()[2])
+    # Toi uu co khoi va ti so so voi DTLS: doc ngoai bat duoc bai noi "an order of magnitude"
+    # trong khi so that la 5,5x. Con so nay phai SINH RA, khong duoc mo ta bang tinh tu.
+    _m = M.pq_messages("ML-KEM-768", "ML-DSA-65")
+    _best = min(M.BLOCK_SIZES, key=lambda b: M.blocksize_cost(_m, b, 0.0)[0])
+    _rt = M.blocksize_cost(_m, _best, 0.0)[0]
+    nums["numBestBlock"] = _best
+    nums["numBestExch"] = "%.0f" % _rt
+    nums["numBestRatio"] = "%.1f" % (_rt / M.DTLS_FLIGHT_RT)
     if m3:
         g = [r for r in m3["rows"] if r["impl"] == "gnutls"]
         gok = [r["frags_est"] for r in g if r["handshake_ok"]]
@@ -488,6 +496,20 @@ def captions(m1, m3):
         if bad and ok:
             nums["numOpensslFewFragFail"] = min(r["frags_est"] for r in bad)
             nums["numOpensslManyFragOk"] = max(r["frags_est"] for r in ok)
+    # M4: so vong DTLS DO DUOC o co hau luong tu. Doc ngoai bat dung lo nay -- truoc do bai
+    # so mot so luot EDHOC do duoc voi mot so vong DTLS TRICH TU RFC.
+    if m4:
+        ok = [r for r in m4["rows"] if r["handshake_ok"]]
+        if ok:
+            nums["numDtlsMeasTurns"] = ok[0]["turns"]
+            nums["numDtlsMaxFrag"] = max(r["frags_est"] for r in ok)
+            nums["numDtlsMinFrag"] = min(r["frags_est"] for r in ok)
+            nums["numDtlsDatagramLo"] = min(r["datagrams"] for r in ok)
+            nums["numDtlsDatagramHi"] = max(r["datagrams"] for r in ok)
+            nums["numDtlsDatagramGrowth"] = "%.2f" % (
+                max(r["datagrams"] for r in ok) / min(r["datagrams"] for r in ok))
+            nums["numDtlsImpl"] = m4["impl"]
+            nums["numDtlsMeasVersion"] = m4["dtls_version"]
     write_tex("numbers.tex",
               "\n".join(r"\newcommand{\%s}{%s}" % (k, v) for k, v in nums.items()) + "\n")
 
@@ -501,6 +523,7 @@ def main():
     print()
     print("  XUẤT XỨ SỐ ĐO:")
     m1 = load("m1_coap_blockwise.json", "M1 CoAP block-wise")
+    m4 = load("m4_dtls_pq_rounds.json", "M4 số vòng DTLS ở cỡ PQ")
     m3 = load("m3_fragment_threshold.json", "M3 khảo sát cài đặt",
               expect=("gnutls", "mbedtls", "openssl"))
     print()
@@ -513,7 +536,7 @@ def main():
     print("  BẢNG:")
     tables(m1, m3)
     print("  CAPTION:")
-    captions(m1, m3)
+    captions(m1, m3, m4)
     print()
     missing = [n for n, v in (("M1", m1), ("M3", m3)) if v is None]
     if missing:

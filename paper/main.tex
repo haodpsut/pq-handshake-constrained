@@ -23,7 +23,7 @@
 \begin{document}
 
 \title{Does the Lightweight Handshake Stay Lightweight?\\
-EDHOC, DTLS~1.3 and Post-Quantum Credentials on IEEE~802.15.4 Links}
+EDHOC, DTLS and Post-Quantum Credentials on IEEE~802.15.4 Links}
 \author{Phuc~Hao~Do%
 \thanks{P.~H.~Do is with CAIRA, Danang Architecture University, Da Nang, Viet Nam
 (e-mail: haodp@dau.edu.vn).}%
@@ -38,8 +38,8 @@ on IEEE~802.15.4 hardware confirm the size reduction while also showing that it 
 into a considerably smaller gain in handshake duration. We ask what remains of the argument
 once credentials become post-quantum. Because an EDHOC message then no longer fits inside one
 802.15.4 frame, CoAP block-wise transfer engages and the handshake becomes a sequence of
-acknowledged blocks, while DTLS fragments at its own handshake layer and keeps its round-trip
-count fixed; the EDHOC-over-CoAP profile itself makes its two-round-trip minimum conditional on
+acknowledged blocks, while DTLS fragments at its own handshake layer and holds its round-trip
+count fixed, which we measure rather than cite; the EDHOC-over-CoAP profile itself makes its two-round-trip minimum conditional on
 exactly the size condition that post-quantum keys break. We validate an exchange-count model
 against an independent CoAP implementation, and sweep the full range of permitted block sizes
 to show that no setting recovers the round trips. Separately, and with classical credentials
