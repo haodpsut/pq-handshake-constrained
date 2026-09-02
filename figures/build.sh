@@ -7,11 +7,11 @@
 set -eu
 cd "$(dirname "$0")/.."
 
-echo "── 1/2  hinh + bang + caption + numbers.tex (matplotlib) ──"
+echo "── 1/4  hinh + bang + caption + numbers.tex (matplotlib) ──"
 python3 figures/make_figures.py
 
 echo
-echo "── 2/2  hinh flow (pdflatex + TikZ) ──"
+echo "── 2/4  hinh flow (pdflatex + TikZ) ──"
 cd figures
 pdflatex -interaction=nonstopmode -halt-on-error fig0-flow.tex > /tmp/pqhs-tex.log 2>&1 || {
   echo "  ⛔ pdflatex LOI:"; grep -E "^! " /tmp/pqhs-tex.log | head -4 | sed 's/^/    /'; exit 1; }
@@ -20,8 +20,11 @@ command -v pdftoppm >/dev/null && pdftoppm -r 130 -png -singlefile out/fig0-flow
 rm -f fig0-flow.aux fig0-flow.log
 echo "  → fig0-flow.pdf / .png"
 echo
-echo "── 3/3  cong: ban thao khong duoc go tay con so ──"
+echo "── 3/4  cong: ban thao khong duoc go tay con so ──"
 cd ..
 python3 paper/check-no-typed-numbers.py || { echo "  ⛔ CONG NAY CHAN. Sua truoc khi dich ban thao."; exit 1; }
+echo
+echo "── 4/4  cong: JSON <-> macro <-> van xuoi da dich ──"
+python3 paper/check-sync.py || { echo "  ⛔ HINH/BANG/VAN KHONG DONG BO."; exit 1; }
 echo
 echo "✅ xong. Hien vat trong figures/out/"
