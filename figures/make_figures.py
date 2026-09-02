@@ -171,8 +171,11 @@ def fig_exchanges(m1):
     # ⚠ LUẬT rút ra sau BỐN lần đè trong cùng một buổi vẽ: chữ đặt trong vùng vẽ phải cạnh
     # tranh chỗ với dữ liệu VÀ với chú giải, mà cả hai đều đổi theo dữ liệu. Nên chú thích
     # mốc đặt ở MÉP DƯỚI bằng toạ độ tương đối, chỗ duy nhất chắc chắn trống ở mọi hình này.
-    ax.text(M.FRAME_PAYLOAD + 90, 4.5, "802.15.4 frame (%d B)" % M.FRAME_PAYLOAD,
-            fontsize=6.5, color=C["gray"], va="bottom")
+    # Nhan moc dat DUOI truc, ngoai vung ve, de khong tranh cho voi duong du lieu.
+    ax.annotate("802.15.4 frame\n(%d B)" % M.FRAME_PAYLOAD,
+                xy=(M.FRAME_PAYLOAD, 8), xytext=(950, 30),
+                fontsize=6.5, color=C["gray"], ha="left", va="center",
+                arrowprops=dict(arrowstyle="-", lw=0.5, color=C["gray"]))
 
     if m1:
         mx = [r["bytes"] for r in m1["rows"]]
@@ -183,7 +186,12 @@ def fig_exchanges(m1):
     ax.set_xlabel("handshake message size (byte)")
     ax.set_ylabel("exchanges")
     ax.set_xlim(0, 5200); ax.set_ylim(0, 88)
-    ax.legend(loc="upper left")
+    # ⚠ Chu giai o "upper left" de len duong du lieu o canh phai cua khung chu, vi duong
+    # di tu duoi trai len tren phai. Vung trong that su la DUOI PHAI.
+    # ⚠ Duong chay CHEO tu duoi trai len tren phai, nen CA HAI goc con lai deu bi chu giai
+    # dai cham vao. Da thu "upper left" va "lower right", hong ca hai. Dat NGOAI khung ve.
+    ax.legend(loc="lower center", bbox_to_anchor=(0.5, 1.02), ncol=1,
+              handlelength=1.6, borderaxespad=0.0)
     save(fig, "fig2-exchanges")
 
 
@@ -317,8 +325,11 @@ def tables(m1, m3):
 
     # B2: mô hình so với ĐO ĐƯỢC
     if m1:
+        # ⚠ KHONG dat lenh LaTeX (\checkmark) vao o bang: `_esc` thoat het ky tu dac biet
+        # nen no in ra nguyen van "\{ }checkmark". Do chinh ban sua thoat ky tu gay ra. Dung
+        # ky tu thuong, bo sinh khong can biet gi ve LaTeX.
         rows = [[r["case"], r["bytes"], r["predicted"], r["measured_c2s"],
-                 r"\checkmark" if r["match"] else r"$\times$"] for r in m1["rows"]]
+                 "yes" if r["match"] else "NO"] for r in m1["rows"]]
         write_tex("tab2-model-vs-measured.tex", texify(
             rows, ["case", "byte", "model", "measured", "agree"],
             "Exchange-count model against an independent CoAP implementation (%s). Datagrams "
@@ -352,8 +363,9 @@ def tables(m1, m3):
                          "%d/%d" % (ok102, len(at102)) if at102 else "--", bound])
         write_tex("tab3-implementations.tex", texify(
             rows, ["implementation", "cells", "at frame MTU", "bounded by"],
-            "Three DTLS implementations on a constrained link. The %d~B MTU is the payload of "
-            "an IEEE~802.15.4 frame after the MAC header and AES-CCM$^*$." % M.FRAME_PAYLOAD,
+            "Bounding quantity for each DTLS implementation. `Cells' counts configurations "
+            "completing a handshake out of those swept; `at frame MTU' restricts that to "
+            "MTU~%d~B." % M.FRAME_PAYLOAD,
             "tab:impls", "llll",
             "The three are bounded by different quantities, so these results characterise the "
             "implementations and not the DTLS protocol.", wide=True))

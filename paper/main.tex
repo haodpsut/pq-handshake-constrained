@@ -51,6 +51,33 @@ EDHOC, DTLS, post-quantum cryptography, CoAP, IEEE 802.15.4, constrained devices
 % =====================================================================
 \input{sec-intro}
 
+% HINH VA BANG. Tat ca sinh ra, khong go tay.
+\begin{figure}[!t]
+  \centering
+  \includegraphics[width=\columnwidth]{fig2-exchanges.pdf}
+  \caption{\capExchanges}
+  \label{fig:exchanges}
+\end{figure}
+
+\begin{figure*}[!t]
+  \centering
+  \includegraphics[width=\textwidth]{fig4-implementations.pdf}
+  \caption{\capImplementations}
+  \label{fig:impls}
+\end{figure*}
+
+\begin{figure*}[!t]
+  \centering
+  \includegraphics[width=\textwidth]{fig3-blocksize-tradeoff.pdf}
+  \caption{\capBlocksize}
+  \label{fig:blocksize}
+\end{figure*}
+
+\input{../figures/out/tab2-model-vs-measured.tex}
+\input{../figures/out/tab3-implementations.tex}
+
+
+% =====================================================================
 % =====================================================================
 \input{sec-results}
 
@@ -79,33 +106,6 @@ measured on real hardware by others, and nothing here supports a statement about
 protocol rather than about three implementations of it.
 
 % =====================================================================
-% HINH VA BANG. Tat ca sinh ra, khong go tay.
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=\columnwidth]{fig2-exchanges.pdf}
-  \caption{\capExchanges}
-  \label{fig:exchanges}
-\end{figure}
-
-\begin{figure*}[t]
-  \centering
-  \includegraphics[width=\textwidth]{fig4-implementations.pdf}
-  \caption{\capImplementations}
-  \label{fig:impls}
-\end{figure*}
-
-\begin{figure*}[t]
-  \centering
-  \includegraphics[width=\textwidth]{fig3-blocksize-tradeoff.pdf}
-  \caption{\capBlocksize}
-  \label{fig:blocksize}
-\end{figure*}
-
-\input{../figures/out/tab2-model-vs-measured.tex}
-\input{../figures/out/tab3-implementations.tex}
-
-
-% =====================================================================
 \section*{Artifact Availability}
 
 All code, measurement scripts and result files are at
@@ -116,16 +116,12 @@ transcribed by hand, and the repository contains the checks that enforce this.
 % =====================================================================
 \section*{Acknowledgment}
 
-The authors used Anthropic's Claude (Opus~5) as an assistant throughout this work. Its use was
-substantial and covered three areas: drafting and editing the prose of all sections; writing
-the measurement, analysis and figure-generation code released with the artifact; and proposing
-the measurement design itself, including the implementation survey that became the principal
-result, the per-implementation positive controls, and the consistency checks between results,
-figures and text. Several intermediate findings it produced were subsequently retracted after
-its own re-checks, and those retractions are recorded in the repository history. All results
-were produced by executing the released code, and every number reported here was verified
-against the recorded run files by the authors, who take full responsibility for the content of
-this paper.
+The authors used Anthropic's Claude (Opus~5) as an assistant in preparing this manuscript.
+Its use covered three areas: drafting and editing prose; writing the measurement and analysis
+scripts released with the artifact; and proposing several of the measurements reported here.
+All results were produced by executing the released code, and every number was checked against
+the recorded run files by the authors, who take full responsibility for the content of this
+paper.
 
 \bibliographystyle{IEEEtran}
 \bibliography{refs}

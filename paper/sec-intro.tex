@@ -49,7 +49,11 @@ fragments at its own handshake layer and sends each flight back-to-back, does no
 independently of any post-quantum consideration, the DTLS implementations one would compare
 against do not all run on such a link at all: of three widely used libraries, one cannot
 complete a handshake at an IEEE~802.15.4 frame payload with any credential size, classical
-ones included, and the three are bounded by different quantities.
+ones included, and the three are bounded by different quantities. DTLS implementations have
+been compared before, notably by state fuzzing across thirteen of
+them~\cite{fiterau2020}, but for state-machine conformance rather than behaviour under a
+constrained MTU; that work states explicitly that its harness ``does not employ reordering and
+fragmentation''.
 
 Neither result concerns cryptographic strength, and neither requires a post-quantum library to
 reproduce: the argument is about message size, so credentials are padded to post-quantum
