@@ -95,16 +95,24 @@ def _esc(x):
     return s
 
 
-def texify(rows, header, caption, label, colspec, note=None):
-    L = [r"\begin{table}[t]", r"\centering",
+def texify(rows, header, caption, label, colspec, note=None, wide=False):
+    """Sinh bang .tex.
+
+    ⚠ `wide=True` dung moi truong `table*` de TRAI HAI COT. Bang rong hon cot ma van dung
+    `table` thi LaTeX bao "Overfull \\hbox ... too wide" -- mot CANH BAO chu khong phai loi,
+    nen no de bi bo qua, va chu se tran ra le. Do duoc: 38,7pt va 12,1pt o hai bang dau tien.
+    Luat cua nha: gioi han that la MEP COT, khong phai mep trang.
+    """
+    env = "table*" if wide else "table"
+    L = [r"\begin{%s}[t]" % env, r"\centering",
          r"\caption{%s}" % caption, r"\label{%s}" % label,
-         r"\begin{tabular}{%s}" % colspec, r"\hline",
+         r"\footnotesize", r"\begin{tabular}{%s}" % colspec, r"\hline",
          " & ".join(header) + r" \\", r"\hline"]
     L += [" & ".join(_esc(c) for c in r) + r" \\" for r in rows]
     L += [r"\hline", r"\end{tabular}"]
     if note:
         L.append(r"\\[2pt]{\footnotesize %s}" % note)
-    L.append(r"\end{table}")
+    L.append(r"\end{%s}" % env)
     return "\n".join(L) + "\n"
 
 
@@ -318,7 +326,8 @@ def tables(m1, m3):
             % (m1["implementation"], m1["n_match"], m1["n_match"] + m1["n_mismatch"]),
             "tab:validation", "lrrrc",
             "Block size %d~B, engaging above %d~B. This validates the counting only; latency "
-            "and energy are not measured here." % (m1["block_size"], m1["frame_payload"])))
+            "and energy are not measured here." % (m1["block_size"], m1["frame_payload"]),
+            wide=True))
 
     # B3: giới hạn của từng cài đặt
     if m3:
@@ -347,7 +356,7 @@ def tables(m1, m3):
             "an IEEE~802.15.4 frame after the MAC header and AES-CCM$^*$." % M.FRAME_PAYLOAD,
             "tab:impls", "llll",
             "The three are bounded by different quantities, so these results characterise the "
-            "implementations and not the DTLS protocol."))
+            "implementations and not the DTLS protocol.", wide=True))
 
 
 def captions(m1, m3):

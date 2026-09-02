@@ -8,7 +8,7 @@
   "n_mismatch": 0,
   "rows": [
     {
-      "case": "EDHOC msg_1 cổ điển",
+      "case": "EDHOC message 1, classical",
       "bytes": 37,
       "predicted": 1,
       "measured_c2s": 1,
@@ -16,7 +16,7 @@
       "match": true
     },
     {
-      "case": "EDHOC msg_2 cổ điển",
+      "case": "EDHOC message 2, classical",
       "bytes": 111,
       "predicted": 2,
       "measured_c2s": 2,
@@ -24,7 +24,7 @@
       "match": true
     },
     {
-      "case": "EDHOC msg_3 cổ điển",
+      "case": "EDHOC message 3, classical",
       "bytes": 77,
       "predicted": 1,
       "measured_c2s": 1,
@@ -32,7 +32,7 @@
       "match": true
     },
     {
-      "case": "EDHOC msg_1 + ML-KEM-512",
+      "case": "EDHOC message 1, ML-KEM-512",
       "bytes": 808,
       "predicted": 13,
       "measured_c2s": 13,
@@ -40,7 +40,7 @@
       "match": true
     },
     {
-      "case": "EDHOC msg_1 + ML-KEM-768",
+      "case": "EDHOC message 1, ML-KEM-768",
       "bytes": 1192,
       "predicted": 19,
       "measured_c2s": 19,
@@ -48,7 +48,7 @@
       "match": true
     },
     {
-      "case": "EDHOC msg_2 + K768/D65",
+      "case": "EDHOC message 2, K768/D65",
       "bytes": 4415,
       "predicted": 69,
       "measured_c2s": 69,
@@ -56,7 +56,7 @@
       "match": true
     },
     {
-      "case": "EDHOC msg_3 + K768/D65",
+      "case": "EDHOC message 3, K768/D65",
       "bytes": 3322,
       "predicted": 52,
       "measured_c2s": 52,

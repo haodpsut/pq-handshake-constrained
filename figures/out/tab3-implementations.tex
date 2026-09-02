@@ -1,8 +1,9 @@
 %% SINH TU figures/make_figures.py -- KHONG sua tay.
-\begin{table}[t]
+\begin{table*}[t]
 \centering
 \caption{Three DTLS implementations on a constrained link. The 102~B MTU is the payload of an IEEE~802.15.4 frame after the MAC header and AES-CCM$^*$.}
 \label{tab:impls}
+\footnotesize
 \begin{tabular}{llll}
 \hline
 implementation & cells & at frame MTU & bounded by \\
@@ -13,4 +14,4 @@ openssl & 9/21 & 0/3 & MTU floor: 250 fails / 300 ok \\
 \hline
 \end{tabular}
 \\[2pt]{\footnotesize The three are bounded by different quantities, so these results characterise the implementations and not the DTLS protocol.}
-\end{table}
+\end{table*}
