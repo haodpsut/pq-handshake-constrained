@@ -404,6 +404,30 @@ def captions(m1, m3):
         "numExchTotalPQ": M.edhoc_exchanges(m768),
         "numKemFiveOneTwo": M.KEM["ML-KEM-512"][0],
     }
+    # Số ĐO ĐƯỢC cũng phải thành macro. Nếu chỉ mô hình có macro còn số đo gõ tay thì bản
+    # thảo lại có hai chỗ ở cho cùng một con số, đúng lỗi đã sinh ra "+0,76 chép 12 lần".
+    if m1:
+        nums["numMOneMatch"] = m1["n_match"]
+        nums["numMOneTotal"] = m1["n_match"] + m1["n_mismatch"]
+        nums["numMOneImpl"] = m1["implementation"]
+    if m3:
+        for impl in sorted({r["impl"] for r in m3["rows"]}):
+            rs = [r for r in m3["rows"] if r["impl"] == impl]
+            ok = [r for r in rs if r["handshake_ok"]]
+            bad = [r for r in rs if not r["handshake_ok"]]
+            cap = impl.capitalize()
+            nums["num%sOk" % cap] = len(ok)
+            nums["num%sTotal" % cap] = len(rs)
+            at = [r for r in rs if r["mtu"] == M.FRAME_PAYLOAD]
+            nums["num%sAtFrame" % cap] = "%d/%d" % (
+                sum(1 for r in at if r["handshake_ok"]), len(at)) if at else "--"
+            if ok and bad:
+                if max(r["frags_est"] for r in ok) < min(r["frags_est"] for r in bad):
+                    nums["num%sFragOk" % cap] = max(r["frags_est"] for r in ok)
+                    nums["num%sFragBad" % cap] = min(r["frags_est"] for r in bad)
+                if min(r["mtu"] for r in ok) > max(r["mtu"] for r in bad):
+                    nums["num%sMtuBad" % cap] = max(r["mtu"] for r in bad)
+                    nums["num%sMtuOk" % cap] = min(r["mtu"] for r in ok)
     write_tex("numbers.tex",
               "\n".join(r"\newcommand{\%s}{%s}" % (k, v) for k, v in nums.items()) + "\n")
 

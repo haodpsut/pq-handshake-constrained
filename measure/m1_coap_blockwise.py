@@ -23,6 +23,8 @@ import json
 import os
 import sys
 
+import importlib.metadata as _md
+
 import aiocoap
 import aiocoap.interfaces
 import aiocoap.resource as resource
@@ -101,6 +103,13 @@ class Relay(asyncio.DatagramProtocol):
 
     def reset(self):
         self.c2s = self.s2c = 0
+
+
+def _aiocoap_version():
+    try:
+        return _md.version("aiocoap")
+    except Exception:                                        # noqa: BLE001
+        return "unknown"
 
 
 def predicted(nbytes):
@@ -191,7 +200,10 @@ async def main():
     with open(out, "w", encoding="utf-8") as f:
         json.dump({"block_size": BLOCK_SIZE, "szx": SZX,
                    "frame_payload": FRAME_PAYLOAD,
-                   "implementation": "aiocoap 0.4.7",
+                   # ⛔ TRUOC DAY GO CUNG "aiocoap 0.4.7". Chay tren VPS la 0.4.17, nen bai se ghi SAI
+                   # phien bien da dung -- ma chinh khac biet phien ban la thu tung lam hong
+                   # phep do nay mot lan. Doc phien ban THAT.
+                   "implementation": "aiocoap " + _aiocoap_version(),
                    "counted": "UDP datagrams via relay",
                    "n_match": ok, "n_mismatch": bad, "rows": rows}, f,
                   indent=2, ensure_ascii=False)
