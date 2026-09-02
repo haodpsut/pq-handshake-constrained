@@ -1,0 +1,85 @@
+% =====================================================================
+%  Khung ban thao — IEEE Networking Letters (gioi han 5 trang; <=4 trang MIEN PHI).
+%
+%  Chay `bash figures/build.sh` TRUOC, vi ban thao \input cac tep sinh ra:
+%    figures/out/numbers.tex   macro so (mo hinh + do duoc + suy ra)
+%    figures/out/captions.tex  loi hinh
+%    figures/out/tab*.tex      bang
+%
+%  Dich: pdflatex main && bibtex main && pdflatex main && pdflatex main
+% =====================================================================
+\documentclass[journal]{IEEEtran}
+
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{booktabs}
+\usepackage{url}
+
+\graphicspath{{../figures/out/}}
+\input{../figures/out/numbers.tex}
+\input{../figures/out/captions.tex}
+
+\begin{document}
+
+\title{Does the Lightweight Handshake Stay Lightweight?\\
+EDHOC, DTLS~1.3 and Post-Quantum Credentials on IEEE~802.15.4 Links}
+\author{(authors withheld for now)}
+
+\maketitle
+
+\begin{abstract}
+% ⛔ CHUA VIET. Cho toan van Fedrecheski de lay luan cu mo dau.
+Placeholder.
+\end{abstract}
+
+\begin{IEEEkeywords}
+EDHOC, DTLS, post-quantum cryptography, CoAP, IEEE 802.15.4, constrained devices.
+\end{IEEEkeywords}
+
+% =====================================================================
+\section{Introduction}
+% ⛔ CHUA VIET. Chan boi: can toan van Fedrecheski (WCNC 2024) de trich
+% con so x6-x14 kich thuoc goi doi lai chi x1.44 thoi luong bat tay.
+Placeholder.
+
+% =====================================================================
+\input{sec-results}
+
+% =====================================================================
+\input{sec-threats}
+
+% =====================================================================
+\section{Conclusion}
+% ⛔ CHUA VIET.
+Placeholder.
+
+% =====================================================================
+% HINH VA BANG. Tat ca sinh ra, khong go tay.
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{fig2-exchanges.pdf}
+  \caption{\capExchanges}
+  \label{fig:exchanges}
+\end{figure}
+
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=\textwidth]{fig4-implementations.pdf}
+  \caption{\capImplementations}
+  \label{fig:impls}
+\end{figure*}
+
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=\textwidth]{fig3-blocksize-tradeoff.pdf}
+  \caption{\capBlocksize}
+  \label{fig:blocksize}
+\end{figure*}
+
+\input{../figures/out/tab2-model-vs-measured.tex}
+\input{../figures/out/tab3-implementations.tex}
+
+\bibliographystyle{IEEEtran}
+\bibliography{refs}
+
+\end{document}

@@ -431,6 +431,7 @@ def captions(m1, m3):
     # Số SUY RA cũng cần macro. Viết "7,8 lần" hay "khoảng 2,3 kB" vào bản thảo là tạo một
     # chỗ ở thứ hai: đổi MAC_AND_SEC trong model.py thì hình đổi mà câu văn thì không.
     nums["numKemFrameRatio"] = "%.1f" % (M.KEM["ML-KEM-512"][0] / M.FRAME_PAYLOAD)
+    nums["numDecompError"] = "%.1f" % abs(M.decomposition_error()[2])
     if m3:
         g = [r for r in m3["rows"] if r["impl"] == "gnutls"]
         gok = [r["frags_est"] for r in g if r["handshake_ok"]]
