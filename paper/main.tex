@@ -101,6 +101,13 @@ constrained link; the two server-side implementations do not, and they fail for 
 reasons, one at a minimum MTU and one at a fragment count. Anyone comparing EDHOC against
 ``DTLS'' on such a link is comparing against whichever library they picked.
 
+Mitigations exist and are worth naming. Handshake caching removes repeated handshakes
+altogether in industrial deployments~\cite{bodenhausen2025}; hardware acceleration reduces the
+computational half of the cost~\cite{batmaz2024}, as do unified post-quantum
+architectures~\cite{dobias2025}; and profiles such as the DTLS profile for
+ACE~\cite{rfc9430} narrow what has to be exchanged. None of them changes the transport
+behaviour measured here, which is set by whether a message fits inside a frame.
+
 What is not claimed: nothing here measures latency, energy, or memory, all of which have been
 measured on real hardware by others, and nothing here supports a statement about DTLS as a
 protocol rather than about three implementations of it.

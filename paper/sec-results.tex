@@ -92,7 +92,9 @@ opposite.
 The obvious objection to Section~\ref{sec:results} is that the block size is a tunable
 parameter. Fig.~\ref{fig:blocksize} sweeps the full range RFC~7959 permits. Larger blocks do
 reduce the exchange count, but each block then exceeds the frame and is fragmented by the
-adaptation layer, where a lost fragment costs the whole block. The optimum lies at the
+adaptation layer, where a lost fragment costs the whole block~\cite{rfc4944,rfc6282}. RFC~9177~\cite{rfc9177} defines
+block options that would reduce this cost, but neither constrained stack examined here
+implements them and the EDHOC-over-CoAP profile does not reference them. The optimum lies at the
 boundary of the permitted range rather than inside it, and even there the count remains an
 order of magnitude above DTLS.
 

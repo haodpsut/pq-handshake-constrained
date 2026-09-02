@@ -15,7 +15,8 @@
 \section{Introduction}
 \label{sec:intro}
 
-EDHOC \cite{rfc9528} exists because it is smaller than DTLS~1.3 \cite{rfc9147}. That is the
+EDHOC~\cite{rfc9528} exists because it is smaller than DTLS~1.3~\cite{rfc9147}; it runs over
+CoAP~\cite{rfc7252} and establishes an OSCORE~\cite{rfc8613} security context. That is the
 argument for deploying it on constrained links, and it is well supported: measuring both
 protocols on constrained hardware over an IEEE~802.15.4 radio, Fedrecheski et
 al.\ \cite{fedrecheski2024} report a $\times\citedFedrPktLo$ to $\times\citedFedrPktHi$ reduction in packet sizes.
@@ -29,11 +30,14 @@ classical credentials.
 
 Post-quantum credentials change the size regime rather than merely the sizes. Their Table~I
 records \citedFedrEdhocFrags{} fragments for a mutually authenticated EDHOC handshake: each message fits inside
-one IEEE~802.15.4 frame, so CoAP block-wise transfer \cite{rfc7959} never engages and the
+one IEEE~802.15.4 frame, so CoAP block-wise transfer~\cite{rfc7959} never engages and the
 handshake completes in the two round trips the EDHOC-over-CoAP profile advertises. The profile
 itself makes that advertisement conditional, noting that the advantage ``can be lost'' in
 combination with block-wise transfers, and that the two-round-trip minimum depends on
 message\_3 remaining ``relatively small \ldots within target MTU sizes'' \cite{rfc9668}.
+
+Independent analyses of EDHOC's security~\cite{perez2024} and later extensions such as
+efficient rekeying~\cite{lopezgomez2026} take that size advantage as given.
 
 A post-quantum key encapsulation key does not remain within those sizes. The smallest
 standardised choice, ML-KEM-512, has an encapsulation key of \numKemFiveOneTwo~B against a
