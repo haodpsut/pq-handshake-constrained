@@ -2,7 +2,7 @@
   "block_size": 64,
   "szx": 2,
   "frame_payload": 102,
-  "implementation": "aiocoap 0.4.7",
+  "implementation": "aiocoap 0.4.17",
   "counted": "UDP datagrams via relay",
   "n_match": 7,
   "n_mismatch": 0,

@@ -20,4 +20,8 @@ command -v pdftoppm >/dev/null && pdftoppm -r 130 -png -singlefile out/fig0-flow
 rm -f fig0-flow.aux fig0-flow.log
 echo "  → fig0-flow.pdf / .png"
 echo
+echo "── 3/3  cong: ban thao khong duoc go tay con so ──"
+cd ..
+python3 paper/check-no-typed-numbers.py || { echo "  ⛔ CONG NAY CHAN. Sua truoc khi dich ban thao."; exit 1; }
+echo
 echo "✅ xong. Hien vat trong figures/out/"

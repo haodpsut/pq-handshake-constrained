@@ -1,0 +1,102 @@
+% =====================================================================
+%  PHAN KET QUA — dong gop CHINH cua bai.
+%
+%  ⚠ KHONG GO SO NAO VAO DAY. Moi con so den tu figures/out/numbers.tex,
+%  do figures/make_figures.py sinh ra tu analysis/model.py va results/*.json.
+%  Neu can mot so chua co macro thi THEM MACRO, dung go tay.
+%
+%  Chay `bash figures/build.sh` truoc khi dich ban thao.
+% =====================================================================
+
+\section{Measurement Setup}
+\label{sec:setup}
+
+All measurements run on a single machine (Ubuntu~24.04) so that every number in this letter
+comes from one environment. Two quantities are measured, and neither requires a post-quantum
+library: the argument is about message \emph{size}, so credentials are padded or substituted to
+post-quantum dimensions rather than computed.
+
+\textbf{Exchanges.} A relay placed between a CoAP client and server counts UDP datagrams in
+each direction. Counting datagrams on the wire, rather than invocations inside the server,
+matters: the implementation used here caches an assembled body and slices it, so a handler is
+called once regardless of how many blocks cross the link.
+
+\textbf{Handshake completion.} A DTLS client and server are run at a fixed MTU with
+certificates of increasing size, and a handshake is recorded as complete only on evidence that
+a successful run alone can produce, never on the absence of an error. Every implementation is
+first exercised against each credential at a wide MTU; a pair that cannot complete there is
+excluded rather than swept, since its cells would report a limit of the library rather than of
+the link. This excluded one pair, discussed in Section~\ref{sec:threats}.
+
+The block size is fixed at \numCoapBlock~B, the default in both Contiki-NG and RIOT, and the
+constrained MTU is \numFramePayload~B, the payload of an IEEE~802.15.4 frame after the MAC
+header and AES-CCM$^*$.
+
+\section{Results}
+\label{sec:results}
+
+\subsection{The exchange count model agrees with an independent implementation}
+
+Table~\ref{tab:validation} compares the exchange counts predicted by the block-wise model
+against datagrams measured with \numMOneImpl, an implementation independent of the model:
+\numMOneMatch/\numMOneTotal{} cases agree exactly. This validates the \emph{counting}, and
+nothing more. It says nothing about latency or energy on a real link, neither of which is
+claimed here.
+
+With that model, a post-quantum EDHOC handshake at ML-KEM-768 and ML-DSA-65 takes
+\numExchTotalPQ{} exchanges: \numExchOnePQ{} for message\_1 alone, whose \numMsgOnePQ~B do not
+fit in a \numFramePayload~B frame. DTLS~1.3 fragments at its own handshake layer and sends
+each flight back-to-back, so its round-trip count stays at \numDtlsRT{} regardless of size
+\cite{rfc9147}. Fig.~\ref{fig:exchanges} shows both.
+
+The threshold, not the ratio, is what matters. Classically an EDHOC message fits inside one
+frame and block-wise never engages, so both protocols take \numDtlsRT{} round trips and
+EDHOC's advantage is expressed purely in bytes. The ML-KEM-512 encapsulation key alone is
+\numKemFiveOneTwo~B, which is $\numKemFrameRatio\times$ that frame payload, so block-wise engages in
+message\_1 at every NIST parameter set, whatever authentication is chosen. This is a property
+of transmitting a KEM public key, not of a particular design.
+
+\subsection{Three implementations, three different limits}
+
+Table~\ref{tab:impls} and Fig.~\ref{fig:impls} report whether each implementation completes a
+DTLS handshake as MTU and certificate size vary. The three do not merely differ in degree;
+they are bounded by different quantities.
+
+\textbf{OpenSSL is bounded by MTU.} It fails at every MTU at or below \numOpensslMtuBad~B and
+completes at every MTU at or above \numOpensslMtuOk~B, for all three certificate sizes. The
+boundary sits at OpenSSL's \texttt{DTLS1\_MIN\_MTU} of 256~B. Fragment count explains nothing
+here: it fails with \numOpensslFewFragFail{} fragments at MTU~\numOpensslMtuBad{} and completes with \numOpensslManyFragOk{} at MTU~\numOpensslMtuOk{}. At the
+\numFramePayload~B payload of an 802.15.4 frame it completes \numOpensslAtFrame{} cases, which
+is to say none. \textbf{This holds for classical credentials too}; it is not a post-quantum
+result.
+
+\textbf{GnuTLS is bounded by fragment count.} It completes at MTU~\numFramePayload, so no MTU
+floor applies, but it completes up to \numGnutlsFragOk{} fragments and fails from
+\numGnutlsFragBad{}. The failures are not an artefact of an impatient
+harness: given an allowance an order of magnitude beyond the probe timeout, the client still
+abandons the handshake on its own retransmission schedule, well inside that allowance. At
+\numFramePayload~B, \numGnutlsFragOk{} fragments cap a handshake message at about
+\numGnutlsCapKB~kB, which post-quantum credentials exceed.
+
+\textbf{mbedTLS shows neither limit} in the range swept, completing
+\numMbedtlsOk/\numMbedtlsTotal{} cases including \numMbedtlsAtFrame{} at
+MTU~\numFramePayload{} with \numMbedtlsMaxFrag{} fragments.
+
+This ordering is worth stating plainly. Of the three, mbedTLS is the one actually deployed on
+constrained devices, and it is the one that handles the constrained link; the two
+server-side implementations do not. The expectation that motivated this measurement was the
+opposite.
+
+\subsection{No block size recovers the round trips}
+
+The obvious objection to Section~\ref{sec:results} is that the block size is a tunable
+parameter. Fig.~\ref{fig:blocksize} sweeps the full range RFC~7959 permits. Larger blocks do
+reduce the exchange count, but each block then exceeds the frame and is fragmented by the
+adaptation layer, where a lost fragment costs the whole block. The optimum lies at the
+boundary of the permitted range rather than inside it, and even there the count remains an
+order of magnitude above DTLS.
+
+Two further points close the objection. The optimum is not reachable on RIOT, whose
+\texttt{CONFIG\_NANOCOAP\_BLOCK\_SIZE\_MAX} is a compile-time ceiling at \numCoapBlock~B; and
+the latency-optimal and energy-optimal block sizes are not the same, so no single setting is
+best on both axes.

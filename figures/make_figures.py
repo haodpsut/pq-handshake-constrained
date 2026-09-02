@@ -428,6 +428,25 @@ def captions(m1, m3):
                 if min(r["mtu"] for r in ok) > max(r["mtu"] for r in bad):
                     nums["num%sMtuBad" % cap] = max(r["mtu"] for r in bad)
                     nums["num%sMtuOk" % cap] = min(r["mtu"] for r in ok)
+    # Số SUY RA cũng cần macro. Viết "7,8 lần" hay "khoảng 2,3 kB" vào bản thảo là tạo một
+    # chỗ ở thứ hai: đổi MAC_AND_SEC trong model.py thì hình đổi mà câu văn thì không.
+    nums["numKemFrameRatio"] = "%.1f" % (M.KEM["ML-KEM-512"][0] / M.FRAME_PAYLOAD)
+    if m3:
+        g = [r for r in m3["rows"] if r["impl"] == "gnutls"]
+        gok = [r["frags_est"] for r in g if r["handshake_ok"]]
+        if gok:
+            nums["numGnutlsCapKB"] = "%.1f" % (max(gok) * M.FRAME_PAYLOAD / 1000.0)
+        mb = [r for r in m3["rows"] if r["impl"] == "mbedtls" and r["handshake_ok"]]
+        if mb:
+            nums["numMbedtlsMaxFrag"] = max(r["frags_est"] for r in mb)
+        # Phản ví dụ cho OpenSSL: hỏng với ÍT mảnh, chạy với NHIỀU mảnh. Đây là bằng chứng
+        # trục số mảnh không giải thích được nó, nên hai số này phải lấy từ dữ liệu.
+        o = [r for r in m3["rows"] if r["impl"] == "openssl"]
+        bad = [r for r in o if not r["handshake_ok"]]
+        ok = [r for r in o if r["handshake_ok"]]
+        if bad and ok:
+            nums["numOpensslFewFragFail"] = min(r["frags_est"] for r in bad)
+            nums["numOpensslManyFragOk"] = max(r["frags_est"] for r in ok)
     write_tex("numbers.tex",
               "\n".join(r"\newcommand{\%s}{%s}" % (k, v) for k, v in nums.items()) + "\n")
 
