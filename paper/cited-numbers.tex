@@ -1,0 +1,23 @@
+% =====================================================================
+%  SO TRICH TU BAI KHAC — mot cho o rieng, tach hoi so DO DUOC cua minh.
+%
+%  Vi sao tach: so do duoc sinh tu results/*.json; so trich thi KHONG, va tron
+%  hai loai vao nhau la cach de mot con so cua nguoi khac bi doc thanh cua minh.
+%  Moi macro duoi day PHAI ghi ro NGUON va DIEU KIEN do.
+%
+%  ⚠ Moi lan them mot so o day, phai da DOC TOAN VAN cho co con so do, khong
+%  duoc lay tu abstract hay tu ket qua tim kiem.
+% =====================================================================
+
+% Fedrecheski, Vucinic, Watteyne, IEEE WCNC 2024. Do tren phan cung rang buoc,
+% radio IEEE 802.15.4. Toan van da doc 02/09/2026.
+%   "EDHOC achieves x6 to x14 reduction in packet sizes, x1.44 improvement in
+%    handshake duration and x2.79 reduction in energy consumed"
+\newcommand{\citedFedrPktLo}{6}
+\newcommand{\citedFedrPktHi}{14}
+% ⚠ x1.44 la DTLS RPK KHONG xac thuc hai chieu. Cau hinh chung thu + hai chieu
+% la x2.79. Trich tran con so ma khong kem cau hinh la SAI.
+\newcommand{\citedFedrDur}{1.44}
+\newcommand{\citedFedrEnergy}{2.79}
+% Bang I cua ho: EDHOC RPK Mutual = 4 ban tin, 4 manh.
+\newcommand{\citedFedrEdhocFrags}{4}

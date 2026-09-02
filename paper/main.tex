@@ -18,6 +18,7 @@
 \graphicspath{{../figures/out/}}
 \input{../figures/out/numbers.tex}
 \input{../figures/out/captions.tex}
+\input{cited-numbers.tex}
 
 \begin{document}
 
@@ -28,8 +29,19 @@ EDHOC, DTLS~1.3 and Post-Quantum Credentials on IEEE~802.15.4 Links}
 \maketitle
 
 \begin{abstract}
-% ⛔ CHUA VIET. Cho toan van Fedrecheski de lay luan cu mo dau.
-Placeholder.
+EDHOC is deployed on constrained links because it is smaller than DTLS~1.3, and measurements
+on IEEE~802.15.4 hardware confirm the size reduction while also showing that it translates
+into a considerably smaller gain in handshake duration. We ask what remains of the argument
+once credentials become post-quantum. Because an EDHOC message then no longer fits inside one
+802.15.4 frame, CoAP block-wise transfer engages and the handshake becomes a sequence of
+acknowledged blocks, while DTLS fragments at its own handshake layer and keeps its round-trip
+count fixed; the EDHOC-over-CoAP profile itself makes its two-round-trip minimum conditional on
+exactly the size condition that post-quantum keys break. We validate an exchange-count model
+against an independent CoAP implementation, and sweep the full range of permitted block sizes
+to show that no setting recovers the round trips. Separately, and with classical credentials
+alone, we find that three widely used DTLS libraries are bounded by three different quantities
+on such a link, one of them unable to complete a handshake at an 802.15.4 frame payload at any
+credential size. Code and measurements are released.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -37,10 +49,7 @@ EDHOC, DTLS, post-quantum cryptography, CoAP, IEEE 802.15.4, constrained devices
 \end{IEEEkeywords}
 
 % =====================================================================
-\section{Introduction}
-% ⛔ CHUA VIET. Chan boi: can toan van Fedrecheski (WCNC 2024) de trich
-% con so x6-x14 kich thuoc goi doi lai chi x1.44 thoi luong bat tay.
-Placeholder.
+\input{sec-intro}
 
 % =====================================================================
 \input{sec-results}
@@ -50,8 +59,24 @@ Placeholder.
 
 % =====================================================================
 \section{Conclusion}
-% ⛔ CHUA VIET.
-Placeholder.
+
+The case for EDHOC on constrained links is a size argument, and the measurement that supports
+it also shows the advantage translating only partly into duration. Post-quantum credentials
+move the handshake across a size threshold rather than along a scale: block-wise transfer
+engages in message\_1 at every standardised parameter set, and no permitted block size brings
+the exchange count near the flight count DTLS holds constant. The threshold follows from
+having to transmit a KEM public key, so it is not something a different EDHOC profile can
+design around.
+
+The implementation survey points the other way from what motivated it. Of the three libraries
+examined, the one actually deployed on constrained devices is the one that handles the
+constrained link; the two server-side implementations do not, and they fail for unrelated
+reasons, one at a minimum MTU and one at a fragment count. Anyone comparing EDHOC against
+``DTLS'' on such a link is comparing against whichever library they picked.
+
+What is not claimed: nothing here measures latency, energy, or memory, all of which have been
+measured on real hardware by others, and nothing here supports a statement about DTLS as a
+protocol rather than about three implementations of it.
 
 % =====================================================================
 % HINH VA BANG. Tat ca sinh ra, khong go tay.

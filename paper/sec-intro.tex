@@ -1,0 +1,56 @@
+% =====================================================================
+%  PHAN MO DAU.
+%
+%  ⚠ DINH VI PHAI CHINH XAC. Fedrecheski et al. CO dem messages va fragments
+%  (Bang I cua ho), nen KHONG duoc viet ``chua ai dem''. Cai ho khong dem la so
+%  LUOT block-wise, va ly do la o co dien EDHOC chi can 4 manh nen block-wise
+%  chua bao gio kich hoat. Che do do cua ho khong cham toi nguong do.
+%
+%  ⚠ x1.44 la cau hinh DTLS RPK KHONG xac thuc hai chieu. Cau hinh chung thu +
+%  hai chieu la x2.79. Trich tran con so ma khong kem cau hinh la sai.
+%
+%  ⚠ KHONG GO SO. Xem paper/check-no-typed-numbers.py va paper/check-sync.py
+% =====================================================================
+
+\section{Introduction}
+\label{sec:intro}
+
+EDHOC \cite{rfc9528} exists because it is smaller than DTLS~1.3 \cite{rfc9147}. That is the
+argument for deploying it on constrained links, and it is well supported: measuring both
+protocols on constrained hardware over an IEEE~802.15.4 radio, Fedrecheski et
+al.\ \cite{fedrecheski2024} report a $\times\citedFedrPktLo$ to $\times\citedFedrPktHi$ reduction in packet sizes.
+
+The same measurement, however, records something the size argument does not predict. Against
+DTLS with raw public keys and no mutual authentication, that reduction buys a $\times\citedFedrDur$
+improvement in handshake duration; the authors state the point themselves, that ``the
+improvement in packet sizes in EDHOC actually translates to a smaller improvement in duration
+and energy''. Bytes on the wire and cost on the link are already only loosely coupled, with
+classical credentials.
+
+Post-quantum credentials change the size regime rather than merely the sizes. Their Table~I
+records \citedFedrEdhocFrags{} fragments for a mutually authenticated EDHOC handshake: each message fits inside
+one IEEE~802.15.4 frame, so CoAP block-wise transfer \cite{rfc7959} never engages and the
+handshake completes in the two round trips the EDHOC-over-CoAP profile advertises. The profile
+itself makes that advertisement conditional, noting that the advantage ``can be lost'' in
+combination with block-wise transfers, and that the two-round-trip minimum depends on
+message\_3 remaining ``relatively small \ldots within target MTU sizes'' \cite{rfc9668}.
+
+A post-quantum key encapsulation key does not remain within those sizes. The smallest
+standardised choice, ML-KEM-512, has an encapsulation key of \numKemFiveOneTwo~B against a
+frame payload of \numFramePayload~B. Post-quantum EDHOC is by now implemented and measured on
+real hardware \cite{fraile2025}, over 6LoWPAN on BLE, establishing that it runs. Whether it is
+still preferable to the protocol it was designed to replace is a separate question, and it is
+the one asked here.
+
+This letter reports two results. First, the condition the profile names is not merely
+approached but crossed: block-wise engages in message\_1 alone, at every NIST parameter set
+and whatever authentication is chosen, so the exchange count grows with size while DTLS, which
+fragments at its own handshake layer and sends each flight back-to-back, does not. Second, and
+independently of any post-quantum consideration, the DTLS implementations one would compare
+against do not all run on such a link at all: of three widely used libraries, one cannot
+complete a handshake at an IEEE~802.15.4 frame payload with any credential size, classical
+ones included, and the three are bounded by different quantities.
+
+Neither result concerns cryptographic strength, and neither requires a post-quantum library to
+reproduce: the argument is about message size, so credentials are padded to post-quantum
+dimensions rather than computed. All code and measurements are released.
