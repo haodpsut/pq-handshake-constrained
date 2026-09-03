@@ -72,6 +72,16 @@ python3 check-sync.py > /tmp/qa2.txt 2>&1
 grep -q "DONG BO" /tmp/qa2.txt && ok "JSON <-> macro <-> PDF" "$(grep -oE 'kiem [0-9]+ gia tri' /tmp/qa2.txt | head -1)" \
   || { no "LECH SO LIEU" ""; sed 's/^/       /' /tmp/qa2.txt; }
 
+echo "── 7. Cover letter: mat tien phai khop than bai ──"
+if [ -f cover-letter.tex ]; then
+  pdflatex -interaction=nonstopmode cover-letter.tex >> qa-all.log 2>&1
+  OUT=$(python3 check-cover-letter.py); RC=$?
+  echo "$OUT" | sed 's/^/  /'
+  [ "$RC" -eq 0 ] || FAIL=$((FAIL+1))
+else
+  ok "cover letter" "(chua co)"
+fi
+
 echo
 [ "$FAIL" -eq 0 ] && echo "  ✅ QA DAT — san sang gui doc ngoai" || echo "  ⛔ QA HONG $FAIL cho"
 exit "$FAIL"

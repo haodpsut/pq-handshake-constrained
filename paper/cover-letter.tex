@@ -1,0 +1,77 @@
+% =====================================================================
+%  COVER LETTER — nop lan dau, IEEE Networking Letters.
+%
+%  ⚠ THU NAY DOC SO TU CUNG NGUON VOI BAN THAO (figures/out/numbers.tex).
+%  Ly do: da tung co ca mot cover letter hua mot khung ma abstract ngay duoi
+%  da rut bo. Mat tien va than bai phai noi cung mot chuyen, va cach chac chan
+%  nhat la chung doc cung mot tep.
+%
+%  Dich: pdflatex cover-letter.tex   (chay tu thu muc paper/)
+% =====================================================================
+\documentclass[11pt]{article}
+\usepackage[a4paper,margin=0.9in]{geometry}
+\usepackage{parskip}
+\usepackage[colorlinks=true,allcolors=blue]{hyperref}
+\input{../figures/out/numbers.tex}
+\pagestyle{empty}
+\setlength{\parskip}{0.45em}
+
+\begin{document}
+
+\hfill September 2026
+
+\vspace{-1em}
+The Editor-in-Chief\\
+IEEE Networking Letters
+
+\vspace{0.6em}
+Dear Editor,
+
+Please consider the enclosed letter, ``Does the Lightweight Handshake Stay Lightweight?
+EDHOC, DTLS and Post-Quantum Credentials on IEEE~802.15.4 Links'', for publication in IEEE
+Networking Letters. The work is original, is not under consideration elsewhere, and has not
+been published previously.
+
+\textbf{What the letter reports.} EDHOC is deployed on constrained links on the grounds that
+it is smaller than DTLS. We ask whether that argument survives post-quantum credentials, and
+find that the question is not one of degree. An ML-KEM-512 encapsulation key alone is
+\numKemFiveOneTwo~B against a \numFramePayload~B IEEE~802.15.4 frame payload, so CoAP
+block-wise transfer engages in message\_1 at every standardised parameter set, whatever
+authentication is chosen. At the block size both constrained stacks ship, the handshake takes
+\numExchTotalPQ{} exchanges against the \numDtlsMeasTurns{} direction changes we measure for
+DTLS.
+
+A second result arrived from checking the first, and is independent of post-quantum
+considerations entirely. Of three widely used DTLS implementations, one cannot complete a
+handshake at an 802.15.4 frame payload with any credential size, classical ones included; the
+three are bounded by different quantities, and none offers DTLS~1.3 over datagrams four years
+after RFC~9147 specified it.
+
+\textbf{Why this venue.} The letter is a measurement study of protocol behaviour and security
+protocol deployment, both named in the journal's scope, and it is the size of a letter rather
+than of a longer paper: one mechanism, measured on two sides, with the tuning space swept to
+show what the mechanism does and does not explain.
+
+\textbf{What we do not claim.} Nothing here measures latency, energy, or memory; those have
+been measured on real hardware by others and we cite rather than repeat them. Nothing here
+supports a statement about DTLS as a protocol rather than about three implementations of it,
+and the letter says so where the result might invite that reading. Where tuning substantially
+recovers the transport penalty we report that too, alongside the reason it is unavailable in
+practice.
+
+\textbf{Reproducibility.} All code, measurements and result files are at
+\url{https://github.com/haodpsut/pq-handshake-constrained}. Every figure, table and numerical
+value in the letter is generated from the released result files by a single command, and the
+repository contains the checks that enforce this. Reproducing the work requires no quantum
+hardware and no post-quantum library: the argument concerns message size, so credentials are
+padded to post-quantum dimensions rather than computed.
+
+Thank you for considering this submission.
+
+\vspace{0.8em}
+Sincerely,\\
+Phuc Hao Do\\
+CAIRA, Danang Architecture University, Da Nang, Viet Nam\\
+\texttt{haodp@dau.edu.vn}
+
+\end{document}

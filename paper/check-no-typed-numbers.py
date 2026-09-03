@@ -29,13 +29,22 @@ ALLOWED = {
     "6": "6LoWPAN, ten cong nghe",
     "5": "Claude Opus 5, ten cong cu trong muc khai dung AI",
     "128": "AES-CCM-128, ten bo ma", "32": "AES-CCM-32, ten bo ma",
+    "2026": "nam, trong dong ngay cua cover letter",
     "64": "AES-CCM-64, ten bo ma",
 }
 
 
 def strip(s):
+    # ⚠ PREAMBLE LA MARKUP, KHONG PHAI TUYEN BO. Quet ca preamble thi cong bat \documentclass
+    # [11pt], \geometry{margin=0.9in}, \setlength{0.45em}... va bao chung la "so go tay".
+    # Do la bao dong gia, va cong hay bao dong gia thi se bi bo qua.
+    if "\\begin{document}" in s:
+        s = s.split("\\begin{document}", 1)[1]
     s = re.sub(r"^%.*$", "", s, flags=re.M)
     s = re.sub(r"\\(num|cited)[A-Za-z]+", " ", s)
+    # Lenh KHOANG CACH cung la markup du no nam trong than: \vspace{0.8em} khong phai mot
+    # tuyen bo ve so lieu.
+    s = re.sub(r"\\(vspace|hspace|setlength|includegraphics|graphicspath)\*?\{[^}]*\}", " ", s)
     s = re.sub(r"\\(ref|cite|label|texttt|emph|textbf|section|subsection|input)\{[^}]*\}", " ", s)
     return s
 

@@ -12,3 +12,4 @@ paper/*.bbl
 paper/*.blg
 paper/main.pdf
 paper/qa*.log
+paper/cover-letter.pdf
