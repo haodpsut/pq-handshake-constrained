@@ -72,7 +72,13 @@ python3 check-sync.py > /tmp/qa2.txt 2>&1
 grep -q "DONG BO" /tmp/qa2.txt && ok "JSON <-> macro <-> PDF" "$(grep -oE 'kiem [0-9]+ gia tri' /tmp/qa2.txt | head -1)" \
   || { no "LECH SO LIEU" ""; sed 's/^/       /' /tmp/qa2.txt; }
 
-echo "── 7. Cover letter: mat tien phai khop than bai ──"
+echo "── 7. Muc bi bo lai / cau doi lap ──"
+# ⚠ Cong nay CANH BAO chu khong chan: no khong doc duoc y, chi chi cho nguoi doc dung cho.
+# Ly do co no: mot vong doc ngoai bi CHAN vi muc De doa khong duoc sua cung cac muc khac,
+# va bai tu mau thuan o ba cho ma khong cong so nao thay.
+python3 check-cross-section.py | sed 's/^/  /'
+
+echo "── 8. Cover letter: mat tien phai khop than bai ──"
 if [ -f cover-letter.tex ]; then
   pdflatex -interaction=nonstopmode cover-letter.tex >> qa-all.log 2>&1
   OUT=$(python3 check-cover-letter.py); RC=$?
