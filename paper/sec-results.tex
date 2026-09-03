@@ -56,14 +56,11 @@ Fig.~\ref{fig:exchanges} shows the growth.
 \subsection{The DTLS comparator, measured rather than cited}
 
 DTLS fragments at its own handshake layer and sends each flight back-to-back, so its
-round-trip count should not grow with size~\cite{rfc9147}. We measure this rather than assume
-it, at the same MTU and relay, using certificate \emph{chains} to enlarge the handshake
-without enlarging the key (Section~\ref{sec:threats}). Throughout, ``fragments'' means the DTLS handshake-layer records a message is split into,
-$\lceil \text{size}/\text{MTU} \rceil$, which is not the same quantity as the 6LoWPAN
-fragments discussed in Section~\ref{sec:blocksize}: the latter lose a further
-\numFragHdr~B to the adaptation-layer header.
-
-Across \numDtlsMinFrag{} to \numDtlsMaxFrag{} handshake fragments, \numDtlsImpl{} completes every
+round-trip count should not grow with size~\cite{rfc9147}. We measure this at the same MTU and relay,
+using certificate \emph{chains} to enlarge the handshake without enlarging the key
+(Section~\ref{sec:threats}). Here ``fragments'' means DTLS handshake-layer records, $\lceil\text{size}/\text{MTU}\rceil$,
+not the 6LoWPAN fragments of Section~\ref{sec:blocksize}, which lose a further \numFragHdr~B
+to their own header. Across \numDtlsMinFrag{} to \numDtlsMaxFrag{} handshake fragments, \numDtlsImpl{} completes every
 handshake, and the datagram count grows from \numDtlsDatagramLo{} to \numDtlsDatagramHi{}
 ($\times\numDtlsDatagramGrowth$) while the number of direction changes stays at
 \numDtlsMeasTurns{} throughout. The flight structure is therefore not an idealisation: at
