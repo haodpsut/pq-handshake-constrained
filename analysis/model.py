@@ -12,11 +12,28 @@ và bài không được trích cái đó mà không khai.
 """
 
 # ── đường truyền ──────────────────────────────────────────────────────────────
-IEEE802154_FRAME = 127      # byte, khung tối đa IEEE 802.15.4
-MAC_AND_SEC = 25            # header MAC + AES-CCM*   ⚠ CHƯA KIỂM, là ước lượng
+# ✅ KHÔNG CÒN LÀ ƯỚC LƯỢNG. RFC 4944 §4 cho đúng phép tính này, nguyên văn:
+#   "Starting from a maximum physical layer packet size of 127 octets (aMaxPHYPacketSize)
+#    and a maximum frame overhead of 25 (aMaxFrameOverhead), the resultant maximum frame
+#    size at the media access control layer is 102 octets. Link-layer security imposes
+#    further overhead, which in the maximum case (21 octets of overhead in the AES-CCM-128
+#    case, versus 9 and 13 for AES-CCM-32 and AES-CCM-64, respectively) leaves only 81
+#    octets available."
+#
+# ⛔ VÀ NÓ LỘ RA MỘT LỖI NHÃN CỦA TÔI. Trước đây tôi ghi 25 là "MAC + AES-CCM*". SAI: 25 là
+# `aMaxFrameOverhead`, tức RIÊNG MAC. Bảo mật tầng liên kết là khoản THÊM, tối đa 21 octet
+# nữa. Nên bài viết "sau MAC header và AES-CCM*" mà lấy 102 là mâu thuẫn với chính nguồn.
+IEEE802154_FRAME = 127      # aMaxPHYPacketSize          [RFC 4944 §4]
+MAC_OVERHEAD = 25           # aMaxFrameOverhead, RIÊNG MAC [RFC 4944 §4]
+LINK_SEC_CCM128 = 21        # AES-CCM-128, mức tối đa      [RFC 4944 §4]
 FRAG_HDR = 5                # header phân mảnh 6LoWPAN, mảnh tiếp theo
-FRAME_PAYLOAD = IEEE802154_FRAME - MAC_AND_SEC              # 102
-PAYLOAD_PER_FRAG = IEEE802154_FRAME - MAC_AND_SEC - FRAG_HDR  # 97
+
+FRAME_PAYLOAD = IEEE802154_FRAME - MAC_OVERHEAD                 # 102, KHÔNG kèm bảo mật LL
+FRAME_PAYLOAD_SECURED = FRAME_PAYLOAD - LINK_SEC_CCM128         # 81, kèm AES-CCM-128
+PAYLOAD_PER_FRAG = IEEE802154_FRAME - MAC_OVERHEAD - FRAG_HDR   # 97
+
+# Giữ tên cũ để không vỡ chỗ khác, nhưng ghi rõ nó là gì.
+MAC_AND_SEC = MAC_OVERHEAD
 
 # ✅ ĐÃ KIỂM TẬN MÃ NGUỒN, hai ngăn xếp độc lập đều mặc định 64:
 #   Contiki-NG  os/net/app-layer/coap/coap-conf.h:58   COAP_MAX_CHUNK_SIZE 64

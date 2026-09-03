@@ -28,6 +28,8 @@ ALLOWED = {
     "802.15": "IEEE 802.15.4", "4944": "RFC 4944", "9177": "RFC 9177",
     "6": "6LoWPAN, ten cong nghe",
     "5": "Claude Opus 5, ten cong cu trong muc khai dung AI",
+    "128": "AES-CCM-128, ten bo ma", "32": "AES-CCM-32, ten bo ma",
+    "64": "AES-CCM-64, ten bo ma",
 }
 
 

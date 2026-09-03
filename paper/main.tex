@@ -91,32 +91,35 @@ EDHOC, DTLS, post-quantum cryptography, CoAP, IEEE 802.15.4, constrained devices
 % =====================================================================
 \section{Conclusion}
 
-The case for EDHOC on constrained links is a size argument, and the measurement that supports
-it also shows the advantage translating only partly into duration. Post-quantum credentials
-move the handshake across a size threshold rather than along a scale: block-wise transfer
-engages in message\_1 at every standardised parameter set, and no permitted block size brings
-the exchange count near the flight count DTLS holds constant. The threshold follows from
-having to transmit a KEM public key, so it is not something a different EDHOC profile can
-design around.
+The case for EDHOC on constrained links is a size argument, and post-quantum credentials move
+the handshake across a size threshold rather than along a scale. What follows is a transport
+change, not a larger version of the same cost: block-wise transfer engages in message\_1 at
+every standardised parameter set, because a KEM public key has to be transmitted and the
+smallest standardised one already exceeds the frame.
 
-The implementation survey points the other way from what motivated it. Of the three libraries
-examined, the one actually deployed on constrained devices is the one that handles the
-constrained link; the two server-side implementations do not, and they fail for unrelated
-reasons, one at a minimum MTU and one at a fragment count. Anyone comparing EDHOC against
-``DTLS'' on such a link is comparing against whichever library they picked.
+How much that costs depends on a shipped default rather than on the protocol. At the block
+size both constrained stacks ship, and which RIOT enforces at compile time, the penalty
+against a measured DTLS baseline is large; at the largest block size RFC~7959 permits it is
+small. Neither stack can reach the latter, and the alternative transfer options of RFC~9177,
+which would recover most of the difference, are implemented by neither and referenced by
+neither EDHOC document.
 
-Mitigations exist and are worth naming. Handshake caching removes repeated handshakes
-altogether in industrial deployments~\cite{bodenhausen2025}; hardware acceleration reduces the
-computational half of the cost~\cite{batmaz2024}, as do unified post-quantum
-architectures~\cite{dobias2025}; and profiles such as the DTLS profile for
-ACE~\cite{rfc9430} narrow what has to be exchanged. None of them changes the transport
-behaviour measured here, which is set by whether a message fits inside a frame.
+The implementation survey points the other way from what motivated it. Of three libraries, the
+one actually deployed on constrained devices is the one that handles the constrained link;
+the two server-side implementations do not, and they fail for unrelated reasons. Anyone
+comparing EDHOC against ``DTLS'' on such a link is comparing against whichever library they
+picked, in a version none of them offers over datagrams.
 
-What is not claimed: nothing here measures latency, energy, or memory, all of which have been
-measured on real hardware by others, and nothing here supports a statement about DTLS as a
-protocol rather than about three implementations of it.
+Mitigations exist and do not change this. Handshake caching removes repeated handshakes
+altogether~\cite{bodenhausen2025}, hardware acceleration and unified post-quantum
+architectures reduce the computational half~\cite{batmaz2024,dobias2025}, and profiles such as
+the DTLS profile for ACE narrow what is exchanged~\cite{rfc9430}. None alters whether a
+message fits inside a frame.
 
-% =====================================================================
+What is not claimed: nothing here measures latency, energy, or memory, all measured on real
+hardware by others, and nothing supports a statement about DTLS as a protocol rather than
+about three implementations of it.
+
 \section*{Artifact Availability}
 
 All code, measurement scripts and result files are at

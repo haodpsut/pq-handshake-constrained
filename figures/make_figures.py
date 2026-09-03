@@ -180,11 +180,14 @@ def fig_exchanges(m1):
     if m1:
         mx = [r["bytes"] for r in m1["rows"]]
         my = [r["measured_c2s"] for r in m1["rows"]]
+        # ⚠ Doc ngoai: hinh nay LAN datagram voi cap yeu-cau/hoi-dap. Diem do la so datagram
+        # THEO MOT CHIEU (client -> server), va vi block-wise la lock-step nen no BANG so
+        # luot. Phai noi ro trong nhan, khong de nguoi doc tu suy.
         ax.plot(mx, my, "o", color="black", ms=4, mfc="none", mew=0.9,
-                label="measured (aiocoap, %d/%d agree)"
+                label="measured: client$\\to$server datagrams (aiocoap, %d/%d agree)"
                       % (m1["n_match"], m1["n_match"] + m1["n_mismatch"]))
     ax.set_xlabel("handshake message size (byte)")
-    ax.set_ylabel("exchanges")
+    ax.set_ylabel("exchanges (request--response pairs)")
     ax.set_xlim(0, 5200); ax.set_ylim(0, 88)
     # ⚠ Chu giai o "upper left" de len duong du lieu o canh phai cua khung chu, vi duong
     # di tu duoi trai len tren phai. Vung trong that su la DUOI PHAI.
@@ -198,8 +201,15 @@ def fig_exchanges(m1):
 # ══════════════════════════════════════════════════════════════════════════════
 # HÌNH 3 — HÌNH CHÍNH: quét cỡ khối, hai trục tối ưu LỆCH nhau, trần RIOT
 # ══════════════════════════════════════════════════════════════════════════════
-def fig_blocksize():
+def fig_blocksize(m4=None):
     msgs = M.pq_messages("ML-KEM-768", "ML-DSA-65")
+    # Moc DTLS: (so vong, so datagram) DO DUOC, lay tu M4. Khong co M4 thi khong ve moc,
+    # thay vi ve mot moc trich tu RFC roi de nguoi doc tuong la do duoc.
+    dtls_ref = None
+    if m4:
+        ok = [r for r in m4["rows"] if r["handshake_ok"]]
+        if ok:
+            dtls_ref = (ok[0]["turns"], max(r["datagrams"] for r in ok))
     fig, (a1, a2) = plt.subplots(1, 2, figsize=(W2, 2.6))
 
     for ax, idx, ylab, ttl in ((a1, 0, "expected exchanges", "(a) latency axis"),
@@ -214,15 +224,22 @@ def fig_blocksize():
             ax.plot(M.BLOCK_SIZES[best], ys[best], "*", color=col, ms=11, mec="black",
                     mew=0.4, zorder=5)
         ax.axvspan(M.RIOT_BLOCK_MAX, M.BLOCK_SIZES[-1] * 1.15, color="black", alpha=0.06)
+        # ⚠ Doc ngoai: bang (b) gan nhan truc NANG LUONG ma khong co cot doi chieu DTLS, nen
+        # nguoi doc khong biet duong cong dang so voi cai gi. Ve moc DTLS DO DUOC o ca hai
+        # bang: (a) so vong, (b) so khung phai phat.
+        if dtls_ref is not None and dtls_ref[idx] is not None:
+            ax.axhline(dtls_ref[idx], color=C["gray"], ls="--", lw=0.9)
         ax.set_xscale("log", base=2); ax.set_yscale("log")
         ax.set_xlim(M.BLOCK_SIZES[0] * 0.8, M.BLOCK_SIZES[-1] * 1.15)
         ax.set_xticks(M.BLOCK_SIZES)
         ax.set_xticklabels([str(b) for b in M.BLOCK_SIZES])
         ax.set_xlabel("CoAP block size (byte)"); ax.set_ylabel(ylab)
         ax.set_title(ttl, fontsize=8)
-    a1.axhline(M.DTLS_FLIGHT_RT, color=C["gray"], ls="--", lw=0.9)
-    a1.text(0.03, 0.06, "DTLS 1.3 = %d exchanges" % M.DTLS_FLIGHT_RT,
-            transform=a1.transAxes, fontsize=7, color=C["gray"])
+    if dtls_ref:
+        a1.text(0.03, 0.06, "DTLS measured = %d" % dtls_ref[0],
+                transform=a1.transAxes, fontsize=7, color=C["gray"])
+        a2.text(0.03, 0.06, "DTLS measured = %d" % dtls_ref[1],
+                transform=a2.transAxes, fontsize=7, color=C["gray"])
     a1.legend(loc="lower left", bbox_to_anchor=(0.0, 0.13))
 
     # ⚠ Ý nghĩa vùng tô thuộc về CAPTION, không thuộc về mặt hình. Hai lần đặt nó lên hình
@@ -486,6 +503,31 @@ def captions(m1, m3, m4=None):
     nums["numQBlockMaxPayloads"] = M.QBLOCK_MAX_PAYLOADS
     nums["numQBlockExch"] = _qb
     nums["numQBlockGain"] = "%.1f" % (_lock / _qb)
+    nums["numFramePayloadSecured"] = M.FRAME_PAYLOAD_SECURED
+    nums["numMacOverhead"] = M.MAC_OVERHEAD
+    nums["numFramePayloadFrame"] = M.IEEE802154_FRAME
+    nums["numLinkSec"] = M.LINK_SEC_CCM128
+    # Khoang sai so do phan ra lan sang so luot: doc ngoai doi bao khoang, khong bao diem.
+    _e = abs(M.decomposition_error()[2]) / 100.0
+    _lo = {k: int(v * (1 - _e)) for k, v in _m.items()}
+    _hi = {k: int(v * (1 + _e)) for k, v in _m.items()}
+    nums["numExchLo"] = M.edhoc_exchanges(_lo)
+    nums["numExchHi"] = M.edhoc_exchanges(_hi)
+    # ⭐ Hai truc cho hai ti so RAT KHAC NHAU, va do la luan diem cua bai: chi phi nam o CAU
+    # TRUC lock-step chu khong o byte tren day. Chi tinh duoc khi da co moc DTLS DO DUOC.
+    if m4:
+        _ok = [r for r in m4["rows"] if r["handshake_ok"]]
+        if _ok:
+            _dt_turns = _ok[0]["turns"]
+            _dt_dg = max(r["datagrams"] for r in _ok)
+            _rtb, _frb, _, _ = M.blocksize_cost(_m, _best, 0.0)
+            nums["numRatioRounds"] = "%.1f" % (_rtb / _dt_turns)
+            nums["numRatioFrames"] = "%.2f" % (_frb / _dt_dg)
+            nums["numBestFrames"] = "%.0f" % _frb
+            # Ti so o co khoi MAC DINH (64 B), tuc cai that su duoc trien khai VA la tran
+            # bien dich cua RIOT. Day moi la phep so dung voi thuc te, khong phai o toi uu.
+            _rtd, _, _, _ = M.blocksize_cost(_m, M.COAP_BLOCK, 0.0)
+            nums["numRatioDefault"] = "%.0f" % (_rtd / _dt_turns)
     if m3:
         g = [r for r in m3["rows"] if r["impl"] == "gnutls"]
         gok = [r["frags_est"] for r in g if r["handshake_ok"]]
@@ -536,7 +578,7 @@ def main():
     print("  HÌNH:")
     fig_size_ratio()
     fig_exchanges(m1)
-    fig_blocksize()
+    fig_blocksize(m4)
     fig_implementations(m3)
     fig_per_message()
     print("  BẢNG:")

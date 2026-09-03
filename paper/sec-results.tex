@@ -28,9 +28,12 @@ first exercised against each credential at a wide MTU; a pair that cannot comple
 excluded rather than swept, since its cells would report a limit of the library rather than of
 the link. This excluded one pair, discussed in Section~\ref{sec:threats}.
 
-The block size is fixed at \numCoapBlock~B, the default in both Contiki-NG and RIOT, and the
-constrained MTU is \numFramePayload~B, the payload of an IEEE~802.15.4 frame after the MAC
-header and AES-CCM$^*$.
+The block size is fixed at \numCoapBlock~B, the default in both Contiki-NG and RIOT. The
+constrained MTU is \numFramePayload~B, which is not an estimate: RFC~4944 derives it as
+\numFramePayloadFrame~B of \texttt{aMaxPHYPacketSize} less \numMacOverhead~B of
+\texttt{aMaxFrameOverhead}~\cite{rfc4944}. Enabling link-layer security subtracts a further
+\numLinkSec~B in the AES-CCM-128 case, leaving \numFramePayloadSecured~B; we use the larger
+figure throughout, so every threshold reported here is the conservative one.
 
 \section{Results}
 \label{sec:results}
@@ -45,31 +48,29 @@ claimed here.
 
 With that model, a post-quantum EDHOC handshake at ML-KEM-768 and ML-DSA-65 takes
 \numExchTotalPQ{} exchanges: \numExchOnePQ{} for message\_1 alone, whose \numMsgOnePQ~B do not
-fit in a \numFramePayload~B frame. Fig.~\ref{fig:exchanges} shows the growth.
+fit in a \numFramePayload~B frame. Propagating the \numDecompError\% residual of the
+per-message decomposition (Section~\ref{sec:threats}) puts that count between \numExchLo{}
+and \numExchHi{}; the interval matters more than the point.
+Fig.~\ref{fig:exchanges} shows the growth.
 
 \subsection{The DTLS comparator, measured rather than cited}
 
 DTLS fragments at its own handshake layer and sends each flight back-to-back, so its
-round-trip count should not grow with size \cite{rfc9147}. We measure this rather than assume
-it, at the same MTU and with the same relay. Certificate \emph{chains} are used to enlarge the
-handshake without enlarging the key, since the library rejects keys beyond its configured
-maximum integer size (Section~\ref{sec:threats}).
-
-Across \numDtlsMinFrag{} to \numDtlsMaxFrag{} fragments, \numDtlsImpl{} completes every
+round-trip count should not grow with size~\cite{rfc9147}. We measure this rather than assume
+it, at the same MTU and relay, using certificate \emph{chains} to enlarge the handshake
+without enlarging the key (Section~\ref{sec:threats}). Across \numDtlsMinFrag{} to \numDtlsMaxFrag{} fragments, \numDtlsImpl{} completes every
 handshake, and the datagram count grows from \numDtlsDatagramLo{} to \numDtlsDatagramHi{}
 ($\times\numDtlsDatagramGrowth$) while the number of direction changes stays at
 \numDtlsMeasTurns{} throughout. The flight structure is therefore not an idealisation: at
 \numDtlsMaxFrag{} fragments, more than twice what a post-quantum handshake requires, the
 round-trip count has not moved.
 
-Two qualifications matter. The measurement is DTLS~\numDtlsMeasVersion, because none of the
-three implementations offers DTLS~1.3 over datagrams: GnuTLS lists protocol versions up to
-DTLS~1.2 only, mbedTLS accepts \texttt{tls12}, \texttt{dtls12} and \texttt{tls13} but no
-\texttt{dtls13}, and OpenSSL's \texttt{s\_server} has no DTLS~1.3 option. Four years after
-RFC~9147, the two-round-trip figure it specifies is not obtainable from any of them. And the
-constant here is \numDtlsMeasTurns{} direction changes rather than the \numDtlsRT{} round
-trips of DTLS~1.3, since DTLS~1.2 carries more flights; what is measured is the invariance,
-not the constant's value.
+The measurement is DTLS~\numDtlsMeasVersion, because no implementation offers DTLS~1.3 over
+datagrams: GnuTLS lists versions to DTLS~1.2, mbedTLS accepts \texttt{tls12},
+\texttt{dtls12} and \texttt{tls13} but no \texttt{dtls13}, and OpenSSL's
+\texttt{s\_server} has no such option. Four years after RFC~9147, the figure it specifies is
+not obtainable from any of them. What is measured here is therefore the invariance, not the
+constant's value.
 
 The threshold, not the ratio, is what matters. Classically an EDHOC message fits inside one
 frame and block-wise never engages, so both protocols take \numDtlsRT{} round trips and
@@ -118,21 +119,27 @@ adaptation layer, where a lost fragment costs the whole block~\cite{rfc4944,rfc6
 alternative block options, and dismissing them because no constrained stack implements them
 would state a structural conclusion on a contingent fact. We therefore model them.
 
-Q-Block with non-confirmable messages sends blocks serially ``without having to wait for a
-response or next request'', acknowledging them in sets of \numQBlockMaxPayloads{}, the default
-value of \texttt{MAX\_PAYLOADS}~\cite{rfc9177}. The exchange count becomes the number of such
-sets rather than the number of blocks: \numQBlockExch{} instead of \numExchTotalPQ{}, a
-reduction of $\numQBlockGain\times$. So the option does recover most of what lock-step costs.
+Q-Block sends blocks serially ``without having to wait'', acknowledging them in sets of
+\numQBlockMaxPayloads{}, the \texttt{MAX\_PAYLOADS} default~\cite{rfc9177}, so the count
+becomes the number of sets: \numQBlockExch{} rather than \numExchTotalPQ{}, a reduction of
+$\numQBlockGain\times$. It recovers most of the cost but not all of it, and not in practice:
+neither constrained stack implements Q-Block, libcoap gates it behind a flag both peers must
+set, and neither EDHOC document references RFC~9177. Our conclusion is therefore scoped to
+EDHOC as profiled in RFC~9668. The optimum lies at the
+boundary of the permitted range rather than inside it, at \numBestBlock~B.
 
-It does not close the gap. \numQBlockExch{} exchanges remain against the
-\numDtlsMeasTurns{} direction changes measured for DTLS, and the recovery is unavailable in
-practice: neither Contiki-NG nor RIOT implements Q-Block, libcoap gates it behind a flag that
-both peers must set, and neither RFC~9528 nor RFC~9668 references RFC~9177. The conclusion this
-letter draws is therefore about EDHOC as profiled in RFC~9668, not about every conceivable
-CoAP transport for it. The optimum lies at the
-boundary of the permitted range rather than inside it, at \numBestBlock~B, and even there the
-count is \numBestExch{} exchanges against \numDtlsRT{} DTLS flights, a factor of
-$\numBestRatio\times$.
+Tuning does help, and considerably. At the default block size, which is also RIOT's
+compile-time ceiling, EDHOC over CoAP needs \numExchTotalPQ{} exchanges against the
+\numDtlsMeasTurns{} direction changes measured for DTLS, a factor of
+$\numRatioDefault\times$. At the optimum the gap narrows to \numBestExch{} against
+\numDtlsMeasTurns{}, a factor of $\numRatioRounds\times$. We state this plainly because it
+qualifies the result: the transport penalty is largely a consequence of the shipped default,
+not an inherent one, and a stack able to use \numBestBlock~B blocks would come close to DTLS
+on this axis. Neither constrained stack can, and RIOT would need a firmware change to try.
+
+On the other axis the gap barely exists: \numBestFrames{} frame transmissions against
+\numDtlsDatagramHi{}, a factor of $\numRatioFrames\times$. The cost is in the lock-step
+structure, not in what goes over the air.
 
 Two further points close the objection. The optimum is not reachable on RIOT, whose
 \texttt{CONFIG\_NANOCOAP\_BLOCK\_SIZE\_MAX} is a compile-time ceiling at \numCoapBlock~B; and
