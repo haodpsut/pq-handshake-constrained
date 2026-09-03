@@ -58,11 +58,16 @@ Fig.~\ref{fig:exchanges} shows the growth.
 DTLS fragments at its own handshake layer and sends each flight back-to-back, so its
 round-trip count should not grow with size~\cite{rfc9147}. We measure this rather than assume
 it, at the same MTU and relay, using certificate \emph{chains} to enlarge the handshake
-without enlarging the key (Section~\ref{sec:threats}). Across \numDtlsMinFrag{} to \numDtlsMaxFrag{} fragments, \numDtlsImpl{} completes every
+without enlarging the key (Section~\ref{sec:threats}). Throughout, ``fragments'' means the DTLS handshake-layer records a message is split into,
+$\lceil \text{size}/\text{MTU} \rceil$, which is not the same quantity as the 6LoWPAN
+fragments discussed in Section~\ref{sec:blocksize}: the latter lose a further
+\numFragHdr~B to the adaptation-layer header.
+
+Across \numDtlsMinFrag{} to \numDtlsMaxFrag{} handshake fragments, \numDtlsImpl{} completes every
 handshake, and the datagram count grows from \numDtlsDatagramLo{} to \numDtlsDatagramHi{}
 ($\times\numDtlsDatagramGrowth$) while the number of direction changes stays at
 \numDtlsMeasTurns{} throughout. The flight structure is therefore not an idealisation: at
-\numDtlsMaxFrag{} fragments, more than twice what a post-quantum handshake requires, the
+\numDtlsMaxFrag{} fragments, more than twice what a post-quantum handshake needs, the
 round-trip count has not moved.
 
 The measurement is DTLS~\numDtlsMeasVersion, because no implementation offers DTLS~1.3 over
@@ -93,7 +98,7 @@ here: it fails with \numOpensslFewFragFail{} fragments at MTU~\numOpensslMtuBad{
 is to say none. \textbf{This holds for classical credentials too}; it is not a post-quantum
 result.
 
-\textbf{GnuTLS is bounded by fragment count.} It completes at MTU~\numFramePayload, so no MTU
+\textbf{GnuTLS is bounded by handshake-fragment count.} It completes at MTU~\numFramePayload, so no MTU
 floor applies, but it completes up to \numGnutlsFragOk{} fragments and fails from
 \numGnutlsFragBad{}. The failures are not an artefact of an impatient
 harness: given an allowance far beyond the probe timeout, the client still
@@ -111,11 +116,12 @@ server-side implementations do not. The expectation that motivated this measurem
 opposite.
 
 \subsection{No block size recovers the round trips}
+\label{sec:blocksize}
 
 The obvious objection to Section~\ref{sec:results} is that the block size is a tunable
 parameter. Fig.~\ref{fig:blocksize} sweeps the full range RFC~7959 permits. Larger blocks do
 reduce the exchange count, but each block then exceeds the frame and is fragmented by the
-adaptation layer, where a lost fragment costs the whole block~\cite{rfc4944,rfc6282}. RFC~9177~\cite{rfc9177} defines
+6LoWPAN adaptation layer, where a lost fragment costs the whole block~\cite{rfc4944,rfc6282}. RFC~9177~\cite{rfc9177} defines
 alternative block options, and dismissing them because no constrained stack implements them
 would state a structural conclusion on a contingent fact. We therefore model them.
 

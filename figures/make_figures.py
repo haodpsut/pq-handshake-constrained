@@ -388,7 +388,7 @@ def tables(m1, m3):
             "implementations and not the DTLS protocol.", wide=True))
 
 
-def captions(m1, m3, m4=None):
+def captions(m1, m3, m4=None, m5=None):
     """Sinh CAPTION ra .tex.
 
     Caption chứa số (tỉ số, số ô khớp, ngưỡng), nên nó cũng là bề mặt tuyên bố và cũng phải
@@ -507,6 +507,7 @@ def captions(m1, m3, m4=None):
     nums["numMacOverhead"] = M.MAC_OVERHEAD
     nums["numFramePayloadFrame"] = M.IEEE802154_FRAME
     nums["numLinkSec"] = M.LINK_SEC_CCM128
+    nums["numFragHdr"] = M.FRAG_HDR
     # Khoang sai so do phan ra lan sang so luot: doc ngoai doi bao khoang, khong bao diem.
     _e = abs(M.decomposition_error()[2]) / 100.0
     _lo = {k: int(v * (1 - _e)) for k, v in _m.items()}
@@ -558,6 +559,18 @@ def captions(m1, m3, m4=None):
                 max(r["datagrams"] for r in ok) / min(r["datagrams"] for r in ok))
             nums["numDtlsImpl"] = m4["impl"]
             nums["numDtlsMeasVersion"] = m4["dtls_version"]
+    # M5: ranh gioi GnuTLS do bang N luot moi o, thay cho HAI luot don. Doc ngoai bat dung
+    # cho nay: mot ranh gioi rut ra tu hai diem khong phai mot ranh gioi.
+    if m5:
+        ok = [r for r in m5["rows"] if r["success_rate"] == 1.0]
+        bad = [r for r in m5["rows"] if r["success_rate"] == 0.0]
+        uns = [r for r in m5["rows"] if 0 < r["success_rate"] < 1]
+        if ok and bad:
+            nums["numBoundOk"] = max(r["frags"] for r in ok)
+            nums["numBoundBad"] = min(r["frags"] for r in bad)
+            nums["numBoundRepeats"] = m5["repeats"]
+            nums["numBoundCells"] = len(m5["rows"])
+            nums["numBoundUnstable"] = len(uns)
     write_tex("numbers.tex",
               "\n".join(r"\newcommand{\%s}{%s}" % (k, v) for k, v in nums.items()) + "\n")
 
@@ -572,6 +585,7 @@ def main():
     print("  XUẤT XỨ SỐ ĐO:")
     m1 = load("m1_coap_blockwise.json", "M1 CoAP block-wise")
     m4 = load("m4_dtls_pq_rounds.json", "M4 số vòng DTLS ở cỡ PQ")
+    m5 = load("m5_boundary_repeats.json", "M5 ranh giới GnuTLS, lặp nhiều lượt")
     m3 = load("m3_fragment_threshold.json", "M3 khảo sát cài đặt",
               expect=("gnutls", "mbedtls", "openssl"))
     print()
@@ -584,7 +598,7 @@ def main():
     print("  BẢNG:")
     tables(m1, m3)
     print("  CAPTION:")
-    captions(m1, m3, m4)
+    captions(m1, m3, m4, m5)
     print()
     missing = [n for n, v in (("M1", m1), ("M3", m3)) if v is None]
     if missing:
