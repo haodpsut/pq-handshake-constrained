@@ -27,6 +27,14 @@ RIOT_BLOCK_MAX = 64
 BLOCK_SIZES = (16, 32, 64, 128, 256, 512, 1024)   # dải RFC 7959 cho phép, 2^(4..10)
 
 DTLS_FLIGHT_RT = 2          # bắt tay DTLS 1.3 đầy đủ, theo flight  [RFC 9147]
+
+# RFC 9177 (Q-Block1/Q-Block2). Đọc tận nguồn 03/09/2026:
+#   "all the blocks can be transmitted serially (akin to fragmented IP packets) WITHOUT
+#    HAVING TO WAIT for a response or next request from the remote CoAP peer"
+#   "MAX_PAYLOADS should be configurable with a DEFAULT VALUE OF 10"
+# Cơ chế: bắn MAX_PAYLOADS khối liên tiếp, server xác nhận cả cụm bằng một 2.31 (Continue),
+# rồi tới cụm sau. Nên số vòng = trần(số khối / MAX_PAYLOADS), không phải mỗi khối một vòng.
+QBLOCK_MAX_PAYLOADS = 10
 N_EDHOC_MSG = 3
 
 # ── cỡ khoá hậu lượng tử, FIPS 203/204 ────────────────────────────────────────
@@ -130,6 +138,19 @@ def blocksize_cost(msgs, block, p_loss):
     if p_ok <= 0:
         return float("inf"), float("inf"), n_blocks, f
     return n_blocks / p_ok, n_blocks * (f + 1) / p_ok, n_blocks, f
+
+
+def qblock_exchanges(msgs, block=COAP_BLOCK, max_payloads=QBLOCK_MAX_PAYLOADS):
+    """Số vòng nếu dùng RFC 9177 Q-Block với bản tin NON, thay cho RFC 7959 lock-step.
+
+    Đọc ngoài yêu cầu mô hình hoá cái này thay vì gạt đi vì "chưa ai cài". Đúng: gạt một
+    phương án chỉ vì chưa được cài đặt là phát biểu kết luận ở mức CẤU TRÚC dựa trên một sự
+    kiện NHẤT THỜI.
+
+    Mỗi bản tin EDHOC vẫn cắt khối riêng, nhưng trong một bản tin thì các khối đi liên tiếp
+    theo cụm MAX_PAYLOADS, mỗi cụm tốn một lượt xác nhận.
+    """
+    return sum(max(1, ceil_div(ceil_div(v, block), max_payloads)) for v in msgs.values())
 
 
 PARAM_SETS = [(k, s) for k in KEM for s in SIG]

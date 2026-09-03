@@ -115,8 +115,21 @@ The obvious objection to Section~\ref{sec:results} is that the block size is a t
 parameter. Fig.~\ref{fig:blocksize} sweeps the full range RFC~7959 permits. Larger blocks do
 reduce the exchange count, but each block then exceeds the frame and is fragmented by the
 adaptation layer, where a lost fragment costs the whole block~\cite{rfc4944,rfc6282}. RFC~9177~\cite{rfc9177} defines
-block options that would reduce this cost, but neither constrained stack examined here
-implements them and the EDHOC-over-CoAP profile does not reference them. The optimum lies at the
+alternative block options, and dismissing them because no constrained stack implements them
+would state a structural conclusion on a contingent fact. We therefore model them.
+
+Q-Block with non-confirmable messages sends blocks serially ``without having to wait for a
+response or next request'', acknowledging them in sets of \numQBlockMaxPayloads{}, the default
+value of \texttt{MAX\_PAYLOADS}~\cite{rfc9177}. The exchange count becomes the number of such
+sets rather than the number of blocks: \numQBlockExch{} instead of \numExchTotalPQ{}, a
+reduction of $\numQBlockGain\times$. So the option does recover most of what lock-step costs.
+
+It does not close the gap. \numQBlockExch{} exchanges remain against the
+\numDtlsMeasTurns{} direction changes measured for DTLS, and the recovery is unavailable in
+practice: neither Contiki-NG nor RIOT implements Q-Block, libcoap gates it behind a flag that
+both peers must set, and neither RFC~9528 nor RFC~9668 references RFC~9177. The conclusion this
+letter draws is therefore about EDHOC as profiled in RFC~9668, not about every conceivable
+CoAP transport for it. The optimum lies at the
 boundary of the permitted range rather than inside it, at \numBestBlock~B, and even there the
 count is \numBestExch{} exchanges against \numDtlsRT{} DTLS flights, a factor of
 $\numBestRatio\times$.

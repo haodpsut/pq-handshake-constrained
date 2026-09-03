@@ -480,6 +480,12 @@ def captions(m1, m3, m4=None):
     nums["numBestBlock"] = _best
     nums["numBestExch"] = "%.0f" % _rt
     nums["numBestRatio"] = "%.1f" % (_rt / M.DTLS_FLIGHT_RT)
+    # RFC 9177 Q-Block: doc ngoai doi mo hinh hoa thay vi gat di vi "chua ai cai".
+    _lock = M.edhoc_exchanges(_m)
+    _qb = M.qblock_exchanges(_m)
+    nums["numQBlockMaxPayloads"] = M.QBLOCK_MAX_PAYLOADS
+    nums["numQBlockExch"] = _qb
+    nums["numQBlockGain"] = "%.1f" % (_lock / _qb)
     if m3:
         g = [r for r in m3["rows"] if r["impl"] == "gnutls"]
         gok = [r["frags_est"] for r in g if r["handshake_ok"]]
