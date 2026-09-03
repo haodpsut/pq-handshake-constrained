@@ -82,7 +82,13 @@ echo "── 7b. Hai nguon ket qua do CUNG dai luong co khop khong ──"
 # ⛔ Lop loi rieng. Ba cong truoc deu hoi "so nay tu dau ra?" va MOI so deu tra loi duoc, nen
 # ca ba deu xanh trong khi m3 in "23 manh xong" con m5 in "23 manh hong 20/20". Khong cong nao
 # hoi "hai cau tra loi co GIONG NHAU khong?". Cong nay hoi dung cau do.
-if ! python3 check-source-agreement.py | sed 's/^/  /'; then FAIL=$((FAIL+1)); fi
+if ! python3 check-source-agreement.py ../results | sed 's/^/  /'; then FAIL=$((FAIL+1)); fi
+
+echo "── 7c. Tuyen bo thuc nghiem KHONG CO chu so co khai nguon khong ──"
+# ⛔ Lop loi rieng. Cau "the failures are not an artefact of an impatient harness" nam trong bai
+# NHIEU NGAY ma khong phep do nao chong do. No khong chua chu so nao, nen moi cong truy-xuat-xu
+# deu mu. Va no dung la cau chong do phan bien nang nhat cua bai.
+python3 check-numberless-claims.py . | sed 's/^/  /'
 
 echo "── 8. Cover letter: mat tien phai khop than bai ──"
 if [ -f cover-letter.tex ]; then

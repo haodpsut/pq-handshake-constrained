@@ -22,8 +22,12 @@ import json
 import os
 import sys
 
-HERE = os.path.dirname(os.path.abspath(__file__))
-RES = os.path.join(HERE, "..", "results")
+# ⛔ THU MUC KET QUA PHAI LA THAM SO, khong duoc suy tu vi tri cua chinh tep nay. Ban dong goi
+# dau tien tra `<cho-dat-script>/../results`, nen chay o kho khac thi no kiem 0 don vi va bao
+# "thieu nguon, bo qua" cho MOI dai luong. Cai chot "0 don vi khong phai la sach" da bat duoc,
+# nhung dung de phai nho den no.
+RES = os.environ.get("PAPER_RESULTS") or (
+    sys.argv[1] if len(sys.argv) > 1 else os.path.join(os.getcwd(), "results"))
 
 
 def load(name):
@@ -81,6 +85,7 @@ CLAIMS = [
 
 
 def main():
+    print("  thu muc ket qua: %s" % RES)
     fail = 0
     checked = 0
     for label, fa, ga, fb, gb, arbiter in CLAIMS:
