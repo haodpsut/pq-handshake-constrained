@@ -36,10 +36,13 @@ the message grows while each key stays inside the bound.
 
 \textbf{Findings are about implementations, not about DTLS.} The three libraries are bounded by
 different quantities at very different points, so nothing here supports a statement about the
-protocol. The DTLS behaviour compared against in Section~\ref{sec:results} is measured on
-DTLS~1.2, not taken from a specification. RFC~9147 is cited only where DTLS~1.3 itself is
-described, and the letter notes that no available implementation offers DTLS~1.3 over
-datagrams, so that specified figure could not be reproduced here.
+protocol, and the comparator of Section~\ref{sec:results} is measured on DTLS~1.2 rather than
+taken from a specification. The GnuTLS span bound in particular is measured, not explained:
+nothing here identifies the internal limit behind it, and these measurements cannot separate a
+reassembly limit from an interaction with the retransmission timer. What is established is
+narrower and enough for the claim made, both obvious candidates being refuted by a
+counterexample inside the grid. The datagram counter was itself checked rather than assumed, the
+same cells run with it and without it, and all \numRelayCtrlCells{} agreed.
 
 \textbf{Loss is assumed independent}, which is optimistic for a low-power radio: bursty loss
 favours larger blocks and would move the optimum. The sweep's conclusion does not rest on the

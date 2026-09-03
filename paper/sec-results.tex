@@ -95,13 +95,18 @@ here: it fails with \numOpensslFewFragFail{} fragments at MTU~\numOpensslMtuBad{
 is to say none. \textbf{This holds for classical credentials too}; it is not a post-quantum
 result.
 
-\textbf{GnuTLS is bounded by handshake-fragment count.} It completes at MTU~\numFramePayload, so no MTU
-floor applies, but it completes up to \numGnutlsFragOk{} fragments and fails from
-\numGnutlsFragBad{}. The failures are not an artefact of an impatient
-harness: given an allowance far beyond the probe timeout, the client still
-abandons the handshake on its own retransmission schedule, well inside that allowance. At
-\numFramePayload~B, \numGnutlsFragOk{} fragments cap a handshake message at about
-\numGnutlsCapKB~kB, which post-quantum credentials exceed.
+\textbf{GnuTLS is bounded by how far the credential spans, not by MTU or by a rounded fragment
+count.} It completes at MTU~\numFramePayload{} with the smallest credential, and a rounded count
+of \numAmbiguousFrag{} fragments falls on both sides of the boundary, so neither candidate
+survives. The \emph{unrounded} ratio of credential size to MTU does separate the outcomes,
+without exception across \numSpanCells{} cells of a \numSpanCerts{}~$\times$~\numSpanMtus{}
+grid and \numSpanTrials{} handshakes: at or below \numSpanOk{} frame payloads every cell
+completes, at or above \numSpanBad{} every cell fails. Rounding merges the two sides, which is
+why two earlier single-trial measurements appeared to disagree at one fragment count. The
+failures are not an impatient harness: given \numLongAllowance~s, \numLongSelfExit{} of
+\numLongRuns{} runs gave up on the client's own retransmission schedule near
+\numLongSeconds~s, and \numLongKilled{} were cut off. At \numFramePayload~B this caps a
+credential at about \numSpanCapKB~kB, which post-quantum credentials exceed.
 
 \textbf{mbedTLS shows neither limit} in the range swept, completing
 \numMbedtlsOk/\numMbedtlsTotal{} cases including \numMbedtlsAtFrame{} at

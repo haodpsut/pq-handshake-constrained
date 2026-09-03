@@ -78,6 +78,12 @@ echo "── 7. Muc bi bo lai / cau doi lap ──"
 # va bai tu mau thuan o ba cho ma khong cong so nao thay.
 python3 check-cross-section.py | sed 's/^/  /'
 
+echo "── 7b. Hai nguon ket qua do CUNG dai luong co khop khong ──"
+# ⛔ Lop loi rieng. Ba cong truoc deu hoi "so nay tu dau ra?" va MOI so deu tra loi duoc, nen
+# ca ba deu xanh trong khi m3 in "23 manh xong" con m5 in "23 manh hong 20/20". Khong cong nao
+# hoi "hai cau tra loi co GIONG NHAU khong?". Cong nay hoi dung cau do.
+if ! python3 check-source-agreement.py | sed 's/^/  /'; then FAIL=$((FAIL+1)); fi
+
 echo "── 8. Cover letter: mat tien phai khop than bai ──"
 if [ -f cover-letter.tex ]; then
   pdflatex -interaction=nonstopmode cover-letter.tex >> qa-all.log 2>&1

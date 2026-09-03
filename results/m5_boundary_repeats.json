@@ -1,0 +1,139 @@
+{
+  "impl": "gnutls 3.8.13",
+  "cert": "c15360.pem",
+  "cert_bytes": 5600,
+  "repeats": 20,
+  "note": "loopback, tre bang 0",
+  "rows": [
+    {
+      "target_frags": 20,
+      "mtu": 280,
+      "frags": 20,
+      "repeats": 20,
+      "ok": 20,
+      "timed_out": 0,
+      "success_rate": 1.0,
+      "mean_seconds": 8.0
+    },
+    {
+      "target_frags": 21,
+      "mtu": 267,
+      "frags": 21,
+      "repeats": 20,
+      "ok": 20,
+      "timed_out": 0,
+      "success_rate": 1.0,
+      "mean_seconds": 8.2
+    },
+    {
+      "target_frags": 22,
+      "mtu": 255,
+      "frags": 22,
+      "repeats": 20,
+      "ok": 20,
+      "timed_out": 0,
+      "success_rate": 1.0,
+      "mean_seconds": 8.4
+    },
+    {
+      "target_frags": 23,
+      "mtu": 244,
+      "frags": 23,
+      "repeats": 20,
+      "ok": 0,
+      "timed_out": 20,
+      "success_rate": 0.0,
+      "mean_seconds": 30.03
+    },
+    {
+      "target_frags": 24,
+      "mtu": 234,
+      "frags": 24,
+      "repeats": 20,
+      "ok": 0,
+      "timed_out": 20,
+      "success_rate": 0.0,
+      "mean_seconds": 30.03
+    },
+    {
+      "target_frags": 25,
+      "mtu": 224,
+      "frags": 25,
+      "repeats": 20,
+      "ok": 0,
+      "timed_out": 20,
+      "success_rate": 0.0,
+      "mean_seconds": 30.03
+    },
+    {
+      "target_frags": 26,
+      "mtu": 216,
+      "frags": 26,
+      "repeats": 20,
+      "ok": 0,
+      "timed_out": 20,
+      "success_rate": 0.0,
+      "mean_seconds": 30.03
+    },
+    {
+      "target_frags": 27,
+      "mtu": 208,
+      "frags": 27,
+      "repeats": 20,
+      "ok": 0,
+      "timed_out": 20,
+      "success_rate": 0.0,
+      "mean_seconds": 30.03
+    },
+    {
+      "target_frags": 28,
+      "mtu": 200,
+      "frags": 28,
+      "repeats": 20,
+      "ok": 0,
+      "timed_out": 20,
+      "success_rate": 0.0,
+      "mean_seconds": 30.03
+    },
+    {
+      "target_frags": 29,
+      "mtu": 194,
+      "frags": 29,
+      "repeats": 20,
+      "ok": 0,
+      "timed_out": 20,
+      "success_rate": 0.0,
+      "mean_seconds": 30.03
+    },
+    {
+      "target_frags": 30,
+      "mtu": 187,
+      "frags": 30,
+      "repeats": 20,
+      "ok": 0,
+      "timed_out": 20,
+      "success_rate": 0.0,
+      "mean_seconds": 30.03
+    },
+    {
+      "target_frags": 31,
+      "mtu": 181,
+      "frags": 31,
+      "repeats": 20,
+      "ok": 0,
+      "timed_out": 20,
+      "success_rate": 0.0,
+      "mean_seconds": 30.03
+    },
+    {
+      "target_frags": 32,
+      "mtu": 175,
+      "frags": 32,
+      "repeats": 20,
+      "ok": 0,
+      "timed_out": 20,
+      "success_rate": 0.0,
+      "mean_seconds": 30.03
+    }
+  ]
+}

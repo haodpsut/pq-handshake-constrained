@@ -323,7 +323,7 @@ def fig_per_message():
 # ══════════════════════════════════════════════════════════════════════════════
 # BẢNG
 # ══════════════════════════════════════════════════════════════════════════════
-def tables(m1, m3):
+def tables(m1, m3, m5=None, m6=None):
     # B1: kích thước và tỉ số, 9 bộ tham số
     rows = []
     for kem, sig in M.PARAM_SETS:
@@ -369,8 +369,27 @@ def tables(m1, m3):
             if not bad:
                 bound = "none found in range"
             elif max(r["frags_est"] for r in ok) < min(r["frags_est"] for r in bad):
-                bound = "fragments: %d ok / %d fails" % (
-                    max(r["frags_est"] for r in ok), min(r["frags_est"] for r in bad))
+                # ⛔ NEU CO PHEP DO LAP NHIEU LUOT thi PHAI dung no, khong dung so tu MOT
+                # luot. Bang nay tung in "23 ok / 28 fails" (m3, mot luot) trong khi van xuoi
+                # in "22 / 23" (m5, 260 luot): HAI TEP KET QUA noi khac nhau ve CUNG mot dai
+                # luong, va cong dong bo khong thay vi no chi so JSON voi macro.
+                # ⛔ KHONG in so manh LAM TRON o day. m6 do 30 o va thay 23 manh nam o CA
+                # HAI phia: xong o MTU 250, hong o MTU 244. ceil() gop 22,40 va 22,95 thanh
+                # cung so nguyen 23, tuc cai thuoc xoa dung cho ranh gioi di qua. Ti so KHONG
+                # lam tron tach sach 30/30 o.
+                if m6 and impl == "gnutls":
+                    _ok = [c for c in m6["grid"] if c["success_rate"] == 1.0]
+                    _bad = [c for c in m6["grid"] if c["success_rate"] == 0.0]
+                    if _ok and _bad:
+                        bound = "spans $\\le$%.1f frame payloads (%d cells)" % (
+                            max(c["cert_bytes"] / float(c["mtu"]) for c in _ok),
+                            len(m6["grid"]))
+                    else:
+                        bound = "fragments: %d ok / %d fails" % (
+                            max(r["frags_est"] for r in ok), min(r["frags_est"] for r in bad))
+                else:
+                    bound = "fragments: %d ok / %d fails" % (
+                        max(r["frags_est"] for r in ok), min(r["frags_est"] for r in bad))
             elif min(r["mtu"] for r in ok) > max(r["mtu"] for r in bad):
                 bound = "MTU floor: %d fails / %d ok" % (
                     max(r["mtu"] for r in bad), min(r["mtu"] for r in ok))
@@ -388,7 +407,7 @@ def tables(m1, m3):
             "implementations and not the DTLS protocol.", wide=True))
 
 
-def captions(m1, m3, m4=None, m5=None):
+def captions(m1, m3, m4=None, m5=None, m6=None):
     """Sinh CAPTION ra .tex.
 
     Caption chứa số (tỉ số, số ô khớp, ngưỡng), nên nó cũng là bề mặt tuyên bố và cũng phải
@@ -576,16 +595,33 @@ def captions(m1, m3, m4=None, m5=None):
                 nums["numChainKeyBits"] = _k[0]
     # M5: ranh gioi GnuTLS do bang N luot moi o, thay cho HAI luot don. Doc ngoai bat dung
     # cho nay: mot ranh gioi rut ra tu hai diem khong phai mot ranh gioi.
-    if m5:
-        ok = [r for r in m5["rows"] if r["success_rate"] == 1.0]
-        bad = [r for r in m5["rows"] if r["success_rate"] == 0.0]
-        uns = [r for r in m5["rows"] if 0 < r["success_rate"] < 1]
-        if ok and bad:
-            nums["numBoundOk"] = max(r["frags"] for r in ok)
-            nums["numBoundBad"] = min(r["frags"] for r in bad)
-            nums["numBoundRepeats"] = m5["repeats"]
-            nums["numBoundCells"] = len(m5["rows"])
-            nums["numBoundUnstable"] = len(uns)
+    if m6:
+        # ⛔ NGUONG PHAT BIEU BANG TI SO KHONG LAM TRON. Xem chu thich o tables().
+        gok = [c for c in m6["grid"] if c["success_rate"] == 1.0]
+        gbad = [c for c in m6["grid"] if c["success_rate"] == 0.0]
+        if gok and gbad:
+            hi = max(c["cert_bytes"] / float(c["mtu"]) for c in gok)
+            lo = min(c["cert_bytes"] / float(c["mtu"]) for c in gbad)
+            nums["numSpanOk"] = "%.1f" % hi
+            nums["numSpanBad"] = "%.2f" % lo
+            nums["numSpanCells"] = len(m6["grid"])
+            nums["numSpanCerts"] = len(m6["cert_bytes"])
+            nums["numSpanMtus"] = len(set(c["mtu"] for c in m6["grid"]))
+            nums["numSpanTrials"] = sum(c["repeats"] for c in m6["grid"])
+            nums["numSpanCapKB"] = "%.1f" % (hi * M.FRAME_PAYLOAD / 1000.0)
+            # so manh LAM TRON xuat hien o CA HAI phia: bang chung rang cai thuoc cu hong
+            both = sorted(set(c["est_frags"] for c in gok) &
+                          set(c["est_frags"] for c in gbad))
+            nums["numAmbiguousFrag"] = both[0] if both else 0
+        la = m6.get("long_allowance") or []
+        if la:
+            nums["numLongAllowance"] = m6["long_timeout"]
+            nums["numLongRuns"] = sum(c["repeats"] for c in la)
+            nums["numLongSelfExit"] = sum(c["self_exited_before_deadline"] for c in la)
+            nums["numLongKilled"] = sum(c["killed_by_harness"] for c in la)
+            nums["numLongSeconds"] = int(round(
+                sum(c["mean_seconds"] for c in la) / float(len(la))))
+        nums["numRelayCtrlCells"] = len(m6.get("control_direct") or [])
     write_tex("numbers.tex",
               "\n".join(r"\newcommand{\%s}{%s}" % (k, v) for k, v in nums.items()) + "\n")
 
@@ -601,6 +637,7 @@ def main():
     m1 = load("m1_coap_blockwise.json", "M1 CoAP block-wise")
     m4 = load("m4_dtls_pq_rounds.json", "M4 số vòng DTLS ở cỡ PQ")
     m5 = load("m5_boundary_repeats.json", "M5 ranh giới GnuTLS, lặp nhiều lượt")
+    m6 = load("m6_boundary_mechanism.json", "M6 cơ chế ranh giới: tách số mảnh khỏi MTU")
     m3 = load("m3_fragment_threshold.json", "M3 khảo sát cài đặt",
               expect=("gnutls", "mbedtls", "openssl"))
     print()
@@ -611,9 +648,9 @@ def main():
     fig_implementations(m3)
     fig_per_message()
     print("  BẢNG:")
-    tables(m1, m3)
+    tables(m1, m3, m5, m6)
     print("  CAPTION:")
-    captions(m1, m3, m4, m5)
+    captions(m1, m3, m4, m5, m6)
     print()
     missing = [n for n, v in (("M1", m1), ("M3", m3)) if v is None]
     if missing:
