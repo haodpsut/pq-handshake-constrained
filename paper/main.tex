@@ -40,19 +40,21 @@ and~Phuc~Hao~Do%
 \maketitle
 
 \begin{abstract}
-EDHOC is deployed on constrained links because it is smaller than DTLS~1.3, and measurements
-on IEEE~802.15.4 hardware confirm the size reduction while also showing that it translates
-into a considerably smaller gain in handshake duration. We ask what remains of the argument
-once credentials become post-quantum. Because an EDHOC message then no longer fits inside one
-802.15.4 frame, CoAP block-wise transfer engages and the handshake becomes a sequence of
-acknowledged blocks, while DTLS fragments at its own handshake layer and holds its round-trip
-count fixed, which we measure rather than cite; the EDHOC-over-CoAP profile itself makes its two-round-trip minimum conditional on
-exactly the size condition that post-quantum keys break. We validate an exchange-count model
-against an independent CoAP implementation, and sweep the full range of permitted block sizes
-to show that no setting recovers the round trips. Separately, and with classical credentials
-alone, we find that three widely used DTLS libraries are bounded by three different quantities
-on such a link, one of them unable to complete a handshake at an 802.15.4 frame payload at any
-credential size. Code and measurements are released.
+EDHOC is deployed on constrained links because it is smaller than DTLS, and measurements on
+IEEE~802.15.4 hardware confirm the size reduction while showing it yields a much smaller gain
+in handshake duration. We ask what remains of that argument once credentials become
+post-quantum. An EDHOC message then no longer fits inside one 802.15.4 frame, so CoAP
+block-wise transfer engages and the handshake becomes a sequence of acknowledged blocks, while
+DTLS holds its round-trip count fixed over the same range, which we measure rather than cite.
+Counted in direction changes on both protocols, the penalty is \numRatioDefault$\times$ at the
+shipped block size and \numRatioBest$\times$ at the largest RFC~7959 permits, which neither
+constrained stack can select; modelling RFC~9177 leaves \numRatioQBlock$\times$ and no
+constrained stack implements it. On airtime the same settings give
+\numRatioFramesDefault$\times$ and \numRatioFrames$\times$, so the cost is dominated by the
+lock-step structure rather than by bytes sent. Separately, with classical credentials alone,
+three widely used DTLS libraries prove bounded by three different quantities, one unable to
+complete a handshake at an 802.15.4 frame payload at any credential size. Code and measurements
+are released.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -63,12 +65,7 @@ EDHOC, DTLS, post-quantum cryptography, CoAP, IEEE 802.15.4, constrained devices
 \input{sec-intro}
 
 % HINH VA BANG. Tat ca sinh ra, khong go tay.
-\begin{figure}[!t]
-  \centering
-  \includegraphics[width=\columnwidth]{fig2-exchanges.pdf}
-  \caption{\capExchanges}
-  \label{fig:exchanges}
-\end{figure}
+
 
 \begin{figure*}[!t]
   \centering

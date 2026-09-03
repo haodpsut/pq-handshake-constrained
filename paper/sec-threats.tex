@@ -1,9 +1,14 @@
 % =====================================================================
 %  DE DOA TOI TINH HOP LE.
 %
-%  Muc nay ton tai de KHAI TRUOC nhung gi phan bien se hoi. Luat cua nha:
-%  ``chua mo hinh'' ma khong kem SO chi la mot loi xin loi. Nen moi han che o
-%  day phai kem HOAC mot con so HOAC mot phat bieu kiem duoc.
+%  ⛔ MUC NAY DA TUNG LA DIEM CHAN CUA MOT VONG DOC NGOAI, va ly do dang ghi lai.
+%  Cac muc khac duoc sua sau khi do them; muc nay thi khong. Bai TU MAU THUAN o
+%  ba cho: goi payload la "uoc luong" trong khi muc II da suy ra tu RFC 4944;
+%  noi so vong DTLS lay tu dac ta trong khi muc III-B da DO duoc; va noi khong
+%  co co khoi nao toi gan DTLS trong khi muc III-D da bao con 4x.
+%
+%  ⇒ LUAT: sua so o BAT KY muc nao thi PHAI doc lai muc nay.
+%     paper/check-cross-section.py kiem tu dong nhung cong khong doc duoc y.
 %
 %  ⚠ KHONG GO SO. Xem paper/check-no-typed-numbers.py
 % =====================================================================
@@ -11,45 +16,48 @@
 \section{Threats to Validity}
 \label{sec:threats}
 
-\textbf{No constrained hardware.} Every measurement here runs on a desktop over loopback. This
+\textbf{No constrained hardware.} Every measurement here runs on a desktop over loopback. That
 bounds what may be claimed, and the claims are bounded accordingly: exchange counts are a
-property of the transport, and no statement is made about latency, energy, or memory. Those
-have been measured on real hardware by others, for TLS and DTLS over
-6TiSCH~\cite{claeys2021}, for an embedded EDHOC module~\cite{fraile2021}, and for
-post-quantum EDHOC~\cite{fraile2025}; this letter cites rather than repeats them.
-The one quantity that would change on real hardware, retransmission behaviour under loss, is
-addressed only qualitatively.
+property of the transport, and no statement is made about latency, energy, or memory, all of
+which have been measured on real hardware by
+others~\cite{claeys2021,fraile2021,fraile2025}. Loopback also has no propagation delay, so a
+timer-driven failure such as the GnuTLS boundary may sit elsewhere on a real link. Ratios are
+taken in direction changes throughout, since a CoAP exchange is a request and a response and
+therefore two of them; comparing exchanges against direction changes halves every ratio.
 
-\textbf{One implementation excluded, not reported as a failure.} mbedTLS cannot load the
-largest certificate at all: \texttt{mbedtls\_x509\_crt\_parse\_file} rejects the key, which
-exceeds the library's configured maximum integer size. Its cells for that credential would
-otherwise read as failures at every MTU, including the widest, and would look exactly like a
-result about the link. They are a limit of the library, reached before the link is touched.
-The per-pair control described in Section~\ref{sec:setup} exists for this case, and this is
-the pair it removed.
+\textbf{One implementation-credential pair excluded.} mbedTLS cannot load the largest
+certificate: \texttt{mbedtls\_x509\_crt\_parse\_file} rejects the key, which exceeds the
+library's configured maximum integer size. Its cells would read as failures at every MTU
+including the widest, looking exactly like a result about the link, when the limit is reached
+before the link is touched; the per-pair control of Section~\ref{sec:setup} removed that pair.
+The same limit dictates how the DTLS baseline is built: the handshake is enlarged with
+certificate \emph{chains}, a leaf and its issuer concatenated into one Certificate message, so
+the message grows while each key stays inside the bound.
 
-\textbf{Findings are about implementations, not about DTLS.} The three libraries are bounded
-by different quantities at very different points, so nothing here supports a statement about
-the protocol. Where DTLS~1.3 itself is characterised, in particular its constant round-trip
-count, the source is the specification \cite{rfc9147} and not these measurements. No DTLS~1.3
-implementation was available to us; \texttt{s\_server} in the OpenSSL version used still
-offers no DTLS~1.3 option, so the flight behaviour was exercised on DTLS~1.2, where the
-mechanism is the same and only the flight count differs.
+\textbf{Findings are about implementations, not about DTLS.} The three libraries are bounded by
+different quantities at very different points, so nothing here supports a statement about the
+protocol. The DTLS behaviour compared against in Section~\ref{sec:results} is measured on
+DTLS~1.2, not taken from a specification. RFC~9147 is cited only where DTLS~1.3 itself is
+described, and the letter notes that no available implementation offers DTLS~1.3 over
+datagrams, so that specified figure could not be reproduced here.
 
-\textbf{Loss is assumed independent.} The block-size sweep treats frame losses as independent,
-which is optimistic for a low-power radio: bursty loss favours larger blocks, and would move
-the optimum. The conclusion drawn from that sweep is deliberately weaker than the curve
-allows, namely that no permitted block size brings the exchange count near the DTLS flight
-count, and this holds across the whole loss range plotted, including the lossless case.
+\textbf{Loss is assumed independent}, which is optimistic for a low-power radio: bursty loss
+favours larger blocks and would move the optimum. The sweep's conclusion does not rest on the
+loss model, holding across the whole range plotted including the lossless case.
 
-\textbf{One estimated parameter.} The MAC and link-layer security overhead subtracted from the
-frame is an estimate rather than a measurement. It affects the frame payload and so the
-fragment counts. It cannot affect the threshold argument: the smallest standardised KEM
-encapsulation key is $\numKemFrameRatio\times$ the frame payload, and no plausible correction
-of a few bytes changes that.
+\textbf{The frame payload is derived, not estimated.} Section~\ref{sec:setup} takes it from
+RFC~4944 as \numFramePayloadFrame~B of \texttt{aMaxPHYPacketSize} less \numMacOverhead~B of
+\texttt{aMaxFrameOverhead}. Enabling link-layer security reduces it further to
+\numFramePayloadSecured~B, so every threshold reported here is the conservative one.
+
+\textbf{What the tuning space does recover.} The largest permitted block size brings the
+penalty to $\numRatioBest\times$ on direction changes and $\numRatioFrames\times$ on
+airtime. The claim is not that no setting helps, but that the ones that help are unreachable
+on the stacks examined, \numCoapBlock~B being both the shipped default and RIOT's
+compile-time ceiling.
 
 \textbf{Scope is EDHOC over CoAP.} The lock-step behaviour follows from CoAP block-wise
-transfer, so it applies to the profile of \cite{rfc9668} and not to EDHOC carried over some
-other transport. The per-message decomposition reproduces the published total to within
-\numDecompError\%, which is adequate for counting exchanges but not for quoting absolute
-sizes; absolute sizes are taken from the published comparison instead.
+transfer, so it applies to the profile of~\cite{rfc9668} and not to EDHOC over another
+transport. The per-message decomposition reproduces the published total to within
+\numDecompError\%, adequate for counting exchanges but not for quoting absolute sizes, which
+are taken from the published comparison instead.

@@ -51,7 +51,7 @@ With that model, a post-quantum EDHOC handshake at ML-KEM-768 and ML-DSA-65 take
 fit in a \numFramePayload~B frame. Propagating the \numDecompError\% residual of the
 per-message decomposition (Section~\ref{sec:threats}) puts that count between \numExchLo{}
 and \numExchHi{}; the interval matters more than the point.
-Fig.~\ref{fig:exchanges} shows the growth.
+
 
 \subsection{The DTLS comparator, measured rather than cited}
 
@@ -124,25 +124,29 @@ would state a structural conclusion on a contingent fact. We therefore model the
 
 Q-Block sends blocks serially ``without having to wait'', acknowledging them in sets of
 \numQBlockMaxPayloads{}, the \texttt{MAX\_PAYLOADS} default~\cite{rfc9177}, so the count
-becomes the number of sets: \numQBlockExch{} rather than \numExchTotalPQ{}, a reduction of
-$\numQBlockGain\times$. It recovers most of the cost but not all of it, and not in practice:
+becomes the number of sets: \numDirQBlock{} direction changes rather than \numDirDefault{},
+a reduction of $\numQBlockGain\times$ that leaves $\numRatioQBlock\times$ the measured DTLS
+baseline. It recovers most of the cost but not all of it, and not in practice:
 neither constrained stack implements Q-Block, libcoap gates it behind a flag both peers must
 set, and neither EDHOC document references RFC~9177. Our conclusion is therefore scoped to
 EDHOC as profiled in RFC~9668. The optimum lies at the
 boundary of the permitted range rather than inside it, at \numBestBlock~B.
 
-Tuning does help, and considerably. At the default block size, which is also RIOT's
-compile-time ceiling, EDHOC over CoAP needs \numExchTotalPQ{} exchanges against the
-\numDtlsMeasTurns{} direction changes measured for DTLS, a factor of
-$\numRatioDefault\times$. At the optimum the gap narrows to \numBestExch{} against
-\numDtlsMeasTurns{}, a factor of $\numRatioRounds\times$. We state this plainly because it
+Tuning does help, and considerably. All ratios below are in direction changes, the quantity
+the relay measures on both protocols; a CoAP exchange contributes two. At the default block
+size, which is also RIOT's compile-time ceiling, EDHOC over CoAP needs \numDirDefault{}
+against the \numDtlsMeasTurns{} measured for DTLS, a factor of $\numRatioDefault\times$. At
+the optimum the gap narrows to \numDirBest{}, a factor of $\numRatioBest\times$. We state this plainly because it
 qualifies the result: the transport penalty is largely a consequence of the shipped default,
 not an inherent one, and a stack able to use \numBestBlock~B blocks would come close to DTLS
 on this axis. Neither constrained stack can, and RIOT would need a firmware change to try.
 
-On the other axis the gap barely exists: \numBestFrames{} frame transmissions against
-\numDtlsDatagramHi{}, a factor of $\numRatioFrames\times$. The cost is in the lock-step
-structure, not in what goes over the air.
+Airtime tells a different story at each setting. At the shipped default it is
+\numFramesDefault{} frame transmissions against \numDtlsDatagramHi{}, a factor of
+$\numRatioFramesDefault\times$; at the optimum it is \numBestFrames{}, a factor of
+$\numRatioFrames\times$. So at the block size that actually ships the penalty is real on both
+axes, but far larger on direction changes than on airtime: the cost is dominated by the
+lock-step structure rather than by what goes over the air.
 
 Two further points close the objection. The optimum is not reachable on RIOT, whose
 \texttt{CONFIG\_NANOCOAP\_BLOCK\_SIZE\_MAX} is a compile-time ceiling at \numCoapBlock~B; and

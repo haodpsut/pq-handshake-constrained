@@ -522,13 +522,22 @@ def captions(m1, m3, m4=None, m5=None):
             _dt_turns = _ok[0]["turns"]
             _dt_dg = max(r["datagrams"] for r in _ok)
             _rtb, _frb, _, _ = M.blocksize_cost(_m, _best, 0.0)
-            nums["numRatioRounds"] = "%.1f" % (_rtb / _dt_turns)
+            # ⛔ MOT DON VI DUY NHAT: lan doi chieu. Truoc day so LUOT cua EDHOC voi LAN
+            # DOI CHIEU cua DTLS, tuc tron don vi, va ti so in ra nhe di dung mot nua.
+            _dc_def = M.edhoc_direction_changes(_m, M.COAP_BLOCK)
+            _dc_best = M.edhoc_direction_changes(_m, _best)
+            _dc_qb = M.qblock_direction_changes(_m)
+            _, _fr_def, _, _ = M.blocksize_cost(_m, M.COAP_BLOCK, 0.0)
+            nums["numDirDefault"] = _dc_def
+            nums["numDirBest"] = _dc_best
+            nums["numDirQBlock"] = _dc_qb
+            nums["numRatioDefault"] = "%.0f" % (_dc_def / _dt_turns)
+            nums["numRatioBest"] = "%.0f" % (_dc_best / _dt_turns)
+            nums["numRatioQBlock"] = "%.0f" % (_dc_qb / _dt_turns)
+            nums["numFramesDefault"] = "%.0f" % _fr_def
+            nums["numRatioFramesDefault"] = "%.2f" % (_fr_def / _dt_dg)
             nums["numRatioFrames"] = "%.2f" % (_frb / _dt_dg)
             nums["numBestFrames"] = "%.0f" % _frb
-            # Ti so o co khoi MAC DINH (64 B), tuc cai that su duoc trien khai VA la tran
-            # bien dich cua RIOT. Day moi la phep so dung voi thuc te, khong phai o toi uu.
-            _rtd, _, _, _ = M.blocksize_cost(_m, M.COAP_BLOCK, 0.0)
-            nums["numRatioDefault"] = "%.0f" % (_rtd / _dt_turns)
     if m3:
         g = [r for r in m3["rows"] if r["impl"] == "gnutls"]
         gok = [r["frags_est"] for r in g if r["handshake_ok"]]
@@ -559,6 +568,12 @@ def captions(m1, m3, m4=None, m5=None):
                 max(r["datagrams"] for r in ok) / min(r["datagrams"] for r in ok))
             nums["numDtlsImpl"] = m4["impl"]
             nums["numDtlsMeasVersion"] = m4["dtls_version"]
+            # Co khoa dung de dung chuoi chung thu: lay tu ten tep trong ket qua, khong go tay.
+            import re as _re
+            _k = sorted({int(x) for r in m4["rows"]
+                         for x in _re.findall(r"c(\d{4,5})\.pem", r["cert"])})
+            if _k:
+                nums["numChainKeyBits"] = _k[0]
     # M5: ranh gioi GnuTLS do bang N luot moi o, thay cho HAI luot don. Doc ngoai bat dung
     # cho nay: mot ranh gioi rut ra tu hai diem khong phai mot ranh gioi.
     if m5:

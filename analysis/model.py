@@ -132,6 +132,26 @@ def edhoc_exchanges(msgs, block=COAP_BLOCK):
     return sum(exchanges_for_message(v, block) for v in msgs.values())
 
 
+# ⛔ ĐƠN VỊ. Đọc ngoài vòng hai bắt được: bài so SỐ LƯỢT của EDHOC với SỐ LẦN ĐỔI CHIỀU của
+# DTLS. Một lượt CoAP là yêu cầu + hồi đáp, tức HAI lần đổi chiều. Nên tỉ số in ra (23×) nhẹ
+# đi đúng một nửa so với con số thật (47×).
+#
+# Nay mọi phép so đi qua MỘT đơn vị: LẦN ĐỔI CHIỀU, vì đó là thứ relay ĐO ĐƯỢC ở cả hai giao
+# thức. Muốn nói bằng "vòng" thì chia hai, và hàm nói rõ nó trả về gì.
+DIRECTION_CHANGES_PER_EXCHANGE = 2
+
+
+def edhoc_direction_changes(msgs, block=COAP_BLOCK):
+    """Số LẦN ĐỔI CHIỀU của EDHOC/CoAP, cùng đơn vị với số đo DTLS."""
+    return edhoc_exchanges(msgs, block) * DIRECTION_CHANGES_PER_EXCHANGE
+
+
+def qblock_direction_changes(msgs, block=COAP_BLOCK, max_payloads=None):
+    """Số LẦN ĐỔI CHIỀU nếu dùng Q-Block, cùng đơn vị."""
+    mp = QBLOCK_MAX_PAYLOADS if max_payloads is None else max_payloads
+    return qblock_exchanges(msgs, block, mp) * DIRECTION_CHANGES_PER_EXCHANGE
+
+
 def frags_for(nbytes):
     """Số mảnh 6LoWPAN cho một datagram. Trong MỘT datagram thì ráp toàn phần hoặc mất cả."""
     return 1 if nbytes <= FRAME_PAYLOAD else ceil_div(nbytes, PAYLOAD_PER_FRAG)
